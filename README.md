@@ -2,6 +2,8 @@
 
 一个 `micro-app` 基座，完整内容查看微前端主仓库：https://github.com/cgfeel/zf-micro-app
 
+`micro-app` 和 `qiankun` 的区别在于，`micro-app` 是通过 `web component` 接入微应用，而 `qiankun` 是基于 `single-spa` 通过区分 `url` 加载不同的应用资源
+
 分 3 个部分：
 
 - `micro-app` 使用
@@ -68,7 +70,7 @@
 仅从配置接入应用进行比较
 
 - 优点 1：基于 `web component` 和 `shadowm`，简单、隔离性好
-- 优点 2：由于 `micro-app` 的侵入性稍微好点，所以使用的范围更广也更方便一点，比如接入 `NextJS` 应用
+- 优点 2：由于接入侵入性少点，所以使用的范围更广也更方便一点，比如接入 `NextJS` 应用
 - 缺点：兼容性，注 ③
 
 > 注 ③：`qinkun` 的沙箱采用的是 `proxy`，同样存在兼容问题；如果需要兼容就要降级沙箱，但这样就要牺牲性能修改模式。
