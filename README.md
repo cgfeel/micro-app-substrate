@@ -2,7 +2,7 @@
 
 一个 `micro-app` 基座，完整内容查看微前端主仓库：https://github.com/cgfeel/zf-micro-app
 
-`micro-app` 和 `qiankun` 的区别在于，`micro-app` 是通过 `web component` 接入微应用，而 `qiankun` 是基于 `single-spa` 通过区分 `url` 加载不同的应用资源
+`micro-app` 和 `qiankun` 的区别在于，`micro-app` 是通过 `web component` 接入微应用，而 `qiankun` 是基于 `single-spa` 通过区分 `url` 加载不同的应用资源。`micro-app` 核心是将应用变成自定义元素，插入到基座中。
 
 分 3 个部分：
 
@@ -73,6 +73,42 @@
 - 优点 2：由于接入侵入性少点，所以使用的范围更广也更方便一点，比如接入 `NextJS` 应用
 - 缺点：兼容性，注 ③
 
-> 注 ③：`qinkun` 的沙箱采用的是 `proxy`，同样存在兼容问题；如果需要兼容就要降级沙箱，但这样就要牺牲性能修改模式。
+> 注 ③：`qinkun` 的沙箱采用的是 `proxy`，同样存在兼容问题；如果需要兼容就要降级沙箱，但这样就要牺牲性能修改模式。而 `micro-app` 是没有降级方案的。
+
+---- 分割线 ----
+
+## `web componet` 创建组件
+
+详细见项目中的文件代码
+
+- 项目：`static-project` [[查看](https://github.com/cgfeel/micro-app-static-project)]
+- 文件：`web-component.html`
+- 运行方式：直接点开浏览器预览
+
+特点：
+
+1. `custom element`: 允许使用非浏览器默认标签名去创建一个自定义元素
+2. `shadowDom`：样式隔离是 `web component` 的一部分
+3. 支持组件的特点：`template` 模板，`slot` 插槽，生命周期、属性
+
+`web componet` 分为 3 个部分：
+
+- 自定义元素，演示中为：`<my-button></my-button>`
+- 模板文件：`template`
+- 继承自 `HTMLElement` 组件类 `MyButton`
+
+`MyButton` 实现过程：
+
+- 定义元素的模式为 `shadowDom`：`this.attachShadow`
+- 通过 `connectedCallback` 进行挂载
+- 先获取 `template` 的内容将其转换成 `Dom`
+- 将拷贝的 `Dom`和样式一并添加到 `shadowDom` 中
+- 通过 `window.customElements.define` 将自定义标签和组件类关联
+
+实例分别演示了：
+
+- `slot` 插槽
+- 样式隔离
+- 事件触发
 
 ---- 分割线 ----
