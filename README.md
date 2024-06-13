@@ -127,29 +127,50 @@
 
 > 这一章节链接指向官方仓库，由于内容比较长，每一条信息我都暴露了关键的对象名，可以打开链接复制关键的对象名，查看上下文对照理解。有一点需要说明的是，`micro-app` 更新速度比 `qinkun` 要快，可能你在查阅的时候最新的源码已做了调整
 
-## `microApp.start` 启动应用
+### `microApp.start` 启动应用
 
-直接从 `start` 方法开始看
+直接从 `start` 方法开始
 
 目录：`micro_app.ts` - `MicroApp` - `start` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app.ts#L272)]
 
 参数：
 
-- `options`：`OptionsType` 类型，直接看官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/configure)]
+- `options`：`OptionsType` 类型，直接看官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=start)]
 
-准备工作，判断环境：
+准备工作，判断和设置环境：
 
 - 先判断环境：`isBrowser || !window.customElements`
 - 保证一个基座只启动 1 次 `hasInit`，通过即设置为 `true` 避免重复 `start`
 - 判断自定义 `tagName`
-
-获取配置：
-
 - `initGlobalEnv`：将当前环境下的 `global` 做一份备份，注 ④
+- 确保真实 `window` 是否中还没有创建自定义的 `tagName`
 
 > 注 ④：
 >
 > - 将 `window`、`document`、`Document` 上的属性和方法拷贝到 `globalEnv` 中
+> - 创建一个 `Image` 的 `proxy` 对象，用于在创建时使用微应用的名称添加一个属性 `__MICRO_APP_NAME__`
 > - 给 `window` 注入一个全局属性 `__MICRO_APP_BASE_APPLICATION__`
 > - 通过 `rejectMicroAppStyle` 创建一个 `style` 标签，将所有 `tagName` 和 `micro-app-body` 作为块级元素，隐藏 `micro-app-head`
 > - `micro-app` 会将子应用的 `head` 转换为 `micro-app-head`，将 `body` 转换为 `micro-app-body`，后面会提到
+
+定义配置文件：
+
+- 将整个 `options` 赋值给 `this.options`
+- `disable-scopecss` 定义全局禁用样式隔离，默认为 `false`
+- `disable-sandbox` 定义全局禁用沙箱，默认为 `false`
+- `preFetch` 利用浏览器空闲时间预加载 `app` 资源，注 ⑤
+
+> 注 ⑤：关于预加载通过文档了解 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/prefetch)]
+>
+> 原理：
+>
+> - `preFetch` 在 `requestIdleCallback` 中起一个微任务
+> - 通过 `preFetchInSerial` 拍平并通过 `preFetchAction` 微任务队列加载：
+> - `preFetchAction` 返回一个 `promise`，在 `promise` 中通过 `requestIdleCallback` 利用空闲时间加载每一个资源
+>
+> `micro-app` 和 `qiankun` 都支持预加载，不同的是：
+>
+> - `qiankun` 默认在第一个应用加载完成后开始预加载，可以通过 `prefetch: 'all'` 优先加载全部应用
+> - `micro-app` 没有自定义加载策略，只能通过 `delay` 统一延迟加载时间
+> - `micro-app` 可以设置加载等级：加载、执行、渲染，`qiankun` 并不支持，同样不支持的还有 `iframe` 沙箱
+> - 除此之外 `micro-app` 预加载还支持隔离、渲染等配置，而 `qiankun` 中需要通过手动加载 `loadMicroApp` 来实现，但手动加载并非预加载
