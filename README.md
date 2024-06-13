@@ -121,10 +121,35 @@
 - 去掉注册信息，无需关心接入协议
 - 使用配置文件启动 `start`
 - 在组件渲染过程中解析 `web component`
-- 将取到的配置文件在 `web component` 进行处理，如添加沙箱等
+- 将取到的配置文件在 `web component` 生命周期内进行处理，如：添加沙箱等
 
 和 `qiankun` 解读一样，为了便于阅读全部以当前官方版本 `c177d77ea7f8986719854bfc9445353d91473f0d` [[查看](https://github.com/micro-zoe/micro-app/tree/c177d77ea7f8986719854bfc9445353d91473f0d)] 为准
 
-> 这一章节链接指向官方仓库，由于内容比较长，每一条信息我都暴露了关键的对象名，可以打开链接复制关键的对象名，查看上下文对照理解。有一点需要说明的是，`micro-app` 更新速度比 `qinkun` 要快，可能你在查阅的时候源码已做了调整，就好像现在我在看珠峰的讲解的时候很多地方需要自我重新理解
+> 这一章节链接指向官方仓库，由于内容比较长，每一条信息我都暴露了关键的对象名，可以打开链接复制关键的对象名，查看上下文对照理解。有一点需要说明的是，`micro-app` 更新速度比 `qinkun` 要快，可能你在查阅的时候最新的源码已做了调整
 
 ## `microApp.start` 启动应用
+
+直接从 `start` 方法开始看
+
+目录：`micro_app.ts` - `MicroApp` - `start` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app.ts#L272)]
+
+参数：
+
+- `options`：`OptionsType` 类型，直接看官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/configure)]
+
+准备工作，判断环境：
+
+- 先判断环境：`isBrowser || !window.customElements`
+- 保证一个基座只启动 1 次 `hasInit`，通过即设置为 `true` 避免重复 `start`
+- 判断自定义 `tagName`
+
+获取配置：
+
+- `initGlobalEnv`：将当前环境下的 `global` 做一份备份，注 ④
+
+> 注 ④：
+>
+> - 将 `window`、`document`、`Document` 上的属性和方法拷贝到 `globalEnv` 中
+> - 给 `window` 注入一个全局属性 `__MICRO_APP_BASE_APPLICATION__`
+> - 通过 `rejectMicroAppStyle` 创建一个 `style` 标签，将所有 `tagName` 和 `micro-app-body` 作为块级元素，隐藏 `micro-app-head`
+> - `micro-app` 会将子应用的 `head` 转换为 `micro-app-head`，将 `body` 转换为 `micro-app-body`，后面会提到
