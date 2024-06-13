@@ -197,3 +197,13 @@
 >
 > - 只修正子应用 `plugins.modules`，不修正 `plugins.global`
 > - 将不符合驼峰规范的 `key` 转换后，重新赋值并删除之前的 `key`
+
+### `defineElement` 自定义组件
+
+原理和上面 `web component` 特性一样，在函数内部定义了一个类 `MicroAppElement`，并通过 `globalEnv.rawWindow.customElements.define` 创建自定义组件
+
+目录：`micro_app_element.ts` - `defineElement` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts)]
+
+参数：
+
+- `tagName`：应用名称
