@@ -159,14 +159,20 @@
 - `disable-scopecss` 定义全局禁用样式隔离，默认为 `false`
 - `disable-sandbox` 定义全局禁用沙箱，默认为 `false`
 - `preFetch` 利用浏览器空闲时间预加载 `app` 资源，注 ⑤
+- `getGlobalAssets` 利用浏览器空闲时间设置全局静态资源，注 ⑥
+- 修正子应用插件的 `key`，注 ⑦
+- 定义配置之后开始创建自定义组件：`defineElement(this.tagName)`
 
 > 注 ⑤：关于预加载通过文档了解 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/prefetch)]
+>
+> 目录：`prefetch.ts` - `preFetch` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L62)]
 >
 > 原理：
 >
 > - `preFetch` 在 `requestIdleCallback` 中起一个微任务
 > - 通过 `preFetchInSerial` 拍平并通过 `preFetchAction` 微任务队列加载：
-> - `preFetchAction` 返回一个 `promise`，在 `promise` 中通过 `requestIdleCallback` 利用空闲时间加载每一个资源
+> - `preFetchAction` 返回一个 `promise`，在 `promise` 中通过 `requestIdleCallback` 空闲时间预加载每一个应用
+> - 在每一个微任务中只通过 `CreateApp` 创建微任务这一件事，这是一个内部的类，外部不可以导入使用
 >
 > `micro-app` 和 `qiankun` 都支持预加载，不同的是：
 >
@@ -174,3 +180,20 @@
 > - `micro-app` 没有自定义加载策略，只能通过 `delay` 统一延迟加载时间
 > - `micro-app` 可以设置加载等级：加载、执行、渲染，`qiankun` 并不支持，同样不支持的还有 `iframe` 沙箱
 > - 除此之外 `micro-app` 预加载还支持隔离、渲染等配置，而 `qiankun` 中需要通过手动加载 `loadMicroApp` 来实现，但手动加载并非预加载
+> - 将
+>
+> 注 ⑥：
+>
+> 目录：`prefetch.ts` - `getGlobalAssets` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L158)]
+>
+> 原理：
+>
+> - 空闲时间分别利用 `fetchGlobalResources` 加载全局资源
+> - 在函数中通过 `fetchSource` 直接 `fetch` 资源后通过 `promiseStream` 作为数据流处理
+> - 将拿到的资源按照 `js` 和 `css` 分类分别通过 `sourceHandler.setInfo` 记录
+> - 在 `sourceHandler` 中将收到的数据记录为一个 `map` 对象
+>
+> 注 ⑦：
+>
+> - 只修正子应用 `plugins.modules`，不修正 `plugins.global`
+> - 将不符合驼峰规范的 `key` 转换后，重新赋值并删除之前的 `key`
