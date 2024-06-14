@@ -173,6 +173,7 @@
 > - 通过 `preFetchInSerial` 拍平并通过 `preFetchAction` 微任务队列加载：
 > - `preFetchAction` 返回一个 `promise`，在 `promise` 中通过 `requestIdleCallback` 空闲时间预加载每一个应用
 > - 在每一个微任务中只通过 `CreateApp` 创建微任务这一件事，这是一个内部的类，外部不可以导入使用
+> - `CreateApp` 构造函数中会用每个应用名，映射一张 `map` 表：`appInstanceMap`（后面会提到）
 >
 > `micro-app` 和 `qiankun` 都支持预加载，不同的是：
 >
@@ -180,7 +181,6 @@
 > - `micro-app` 没有自定义加载策略，只能通过 `delay` 统一延迟加载时间
 > - `micro-app` 可以设置加载等级：加载、执行、渲染，`qiankun` 并不支持，同样不支持的还有 `iframe` 沙箱
 > - 除此之外 `micro-app` 预加载还支持隔离、渲染等配置，而 `qiankun` 中需要通过手动加载 `loadMicroApp` 来实现，但手动加载并非预加载
-> - 将
 >
 > 注 ⑥：
 >
@@ -207,3 +207,67 @@
 参数：
 
 - `tagName`：应用名称
+
+这里按照珠峰的课程只罗列提到的几个方法
+
+在当前版本的 `micro-app` 做了调整：
+
+- 在 `MicroAppElement` 中是有两个静态方法 `static get data` 和 `static set data`，不再提供给自定义组件 `<micro-app />` 使用
+- 而是作为 `MicroAppElement` 修改 `this.data` 值时触发，而只有 `setAttribute` 这一处，这是对外提供的
+- 而只有当 `setAttribute` 设置的 `key` 是 `data` 的时候，才会遍历 `value` 更新 `this.data`，从而触发 `microApp.setDat`
+- 去除了 `MicroAppElement` 构造函数，给 `property` 打补丁也修改为 `patchElementAndDocument`，并挪动到沙箱中使用
+
+当然调整的肯定不止这些，我能看到的是课程和当前版本中的对比，下面罗列的方法都在 `MicroAppElement` 类中，赋值关键词查阅
+
+#### `connectedCallback` 挂载组件：
+
+- 自增 `this.connectedCount`
+- 设置一个状态 `map`：`this.connectStateMap.set(cacheCount, true)`
+
+`defer` 添加一个微任务：
+
+- `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
+- 如果提供了应用名和连接，执行首次挂载避免重复渲染
+
+> 注 ⑧：使用当前元素、应用名、`created` 来创建事件
+>
+> - 先定位到元素的根元素上：`getRootContainer`
+> - 删除作用域中其他应用
+> - 将信息合并创建自定义 `created` 事件，并通过 `formatEventInfo` 捆绑事件对象元素
+> - 如果 `start` 时提供了 `created` 优先触发
+> - 然后触发自定义事件 `created`
+
+#### `disconnectedCallback` 卸载组件：
+
+- 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
+- 执行卸载操作
+
+#### `attributeChangedCallback` 观察属性修改：
+
+只观察 2 个属性：`name`、`url`，提供的值一个非空的字符，且和老的值不一样才会执行
+
+如果当前修改的是 `url` 或 `name`，且值为空或者当前元素已卸载：
+
+- 如果是 `url`，格式化 `formatAppURL` 并更新值
+- 如果是 `name`，在格式化并更新值之前，要先更新：应用信息、元素信息、属性
+- 无论是更新 `url` 还是 `name`，只要当前元素已挂载，就会再次执行一遍挂载操作 `handleInitialNameAndUrl`
+- 如果以上都不是且状态不是 `isWaiting`，创建一个微任务 `handleAttributeUpdate`
+- 否则不做任何操作
+
+`handleAttributeUpdate` 更新已赋值且挂载的应用：
+
+- 进入微任务先取消 `isWaiting` 状态
+- 查看当前元素上 `url` 和 `name` 都是有效值：`this.getAttribute`
+- 通过 `appInstanceMap` 将应用取出来
+- 如果修改的是 `name`，应用没有卸载、没有隐藏、不是预加载，更新之后返回一个错误警告
+- 否则进行修改应用信息
+
+修改应用信息：
+
+- 如果修改 `url`，卸载应用后再启动：`unmount` - `actionsForAttributeChange`
+- 否则看是否在线应用，断开连接后再启动：`actionsForAttributeChange` - `actionsForAttributeChange`
+- 其他情况参考第一条，区别在于不会在卸载时清除缓存
+
+如果当前元素上 `name` 或 `url` 是空值，且 `name` 发生了变动：
+
+- 不去管应用状态，直接修改 `this.setAttribute`

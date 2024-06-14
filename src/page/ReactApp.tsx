@@ -6,6 +6,7 @@ function ReactApp() {
         name="react-project"
         url="//localhost:10000"
         baseroute="/react"
+        data-testidset="test"
       />
     </>
   );
