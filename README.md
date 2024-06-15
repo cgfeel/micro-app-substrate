@@ -364,10 +364,17 @@
 
 ### `CreateApp` 创世应用类
 
-在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建
+在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建。
 
 目录：`create_app.ts` - `CreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts)]
 
 参数：
 
 - `options`：`CreateAppParam` 类型，从 `start` 中提取出来的，建议参考文档
+
+`CreateApp` 的主要作用是：
+
+- 理由拿到的信息加载资源
+- 启动沙箱
+- 加载应用
+- 将自身对象添加到映射表中：`appInstanceMap`
