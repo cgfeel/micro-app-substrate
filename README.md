@@ -217,9 +217,9 @@
 - 而只有当 `setAttribute` 设置的 `key` 是 `data` 的时候，才会遍历 `value` 更新 `this.data`，从而触发 `microApp.setDat`
 - 去除了 `MicroAppElement` 构造函数，给 `property` 打补丁也修改为 `patchElementAndDocument`，并挪动到沙箱中使用
 
-当然调整的肯定不止这些，我能看到的是课程和当前版本中的对比，下面罗列的方法都在 `MicroAppElement` 类中，赋值关键词查阅
+当然调整的肯定不止这些，我能看到的是课程和当前版本中的对比，下面罗列的方法都在 `MicroAppElement` 类中，复制关键词查阅
 
-#### `connectedCallback` 挂载组件：
+#### 1.1 `connectedCallback` 挂载组件：
 
 - 自增 `this.connectedCount`
 - 设置一个状态 `map`：`this.connectStateMap.set(cacheCount, true)`
@@ -227,7 +227,7 @@
 `defer` 添加一个微任务：
 
 - `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
-- 如果提供了应用名和连接，执行首次挂载避免重复渲染
+- 如果提供了应用名和连接，执行首次挂载 `handleConnected`，稍后总结
 
 > 注 ⑧：使用当前元素、应用名、`created` 来创建事件
 >
@@ -237,12 +237,12 @@
 > - 如果 `start` 时提供了 `created` 优先触发
 > - 然后触发自定义事件 `created`
 
-#### `disconnectedCallback` 卸载组件：
+#### 1.2 `disconnectedCallback` 卸载组件：
 
 - 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
-- 执行卸载操作
+- 执行卸载操作 `handleDisconnected`
 
-#### `attributeChangedCallback` 观察属性修改：
+#### 2.1 `attributeChangedCallback` 观察属性修改：
 
 只观察 2 个属性：`name`、`url`，提供的值一个非空的字符，且和老的值不一样才会执行
 
@@ -251,6 +251,7 @@
 - 如果是 `url`，格式化 `formatAppURL` 并更新值
 - 如果是 `name`，在格式化并更新值之前，要先更新：应用信息、元素信息、属性
 - 无论是更新 `url` 还是 `name`，只要当前元素已挂载，就会再次执行一遍挂载操作 `handleInitialNameAndUrl`
+- `handleInitialNameAndUrl` 中会根据应用启动状态，执行首次加载 `handleConnected`，稍后总结
 - 如果以上都不是且状态不是 `isWaiting`，创建一个微任务 `handleAttributeUpdate`
 - 否则不做任何操作
 
@@ -271,3 +272,102 @@
 如果当前元素上 `name` 或 `url` 是空值，且 `name` 发生了变动：
 
 - 不去管应用状态，直接修改 `this.setAttribute`
+
+有了以上流程之后再来看挂载应用
+
+#### 3.1 `handleConnected` 首次加载
+
+称作首次加载来自与备注：`first mount of this app`，其实会分别在这些场合触发：
+
+- `handleInitialNameAndUrl`：修改属性后，包括首次赋值
+- `connectedCallback`：已挂载组件时
+- `reload`：重新加载应用
+
+> 在珠峰课程里 `initialMount` 就是 `handleConnected`，只是版本不一样叫法不一样
+
+现在可以带入场景来看了，假定有一个初始化的 `web-component`，首次加载如下：
+
+- `attributeChangedCallback`：观察变化的属性
+- 设置 `name` 和 `url`，且 `this` 没有值，更新后发起挂载 `handleInitialNameAndUrl`
+- 由于应用并没有完成挂载 `this.connectStateMap` 导致无效
+- 生命周期来到已挂载：`connectedCallback`，记录 `this.connectStateMap`
+- 在微任务中检查到 `name` 和 `url`，发起首次挂载
+- 如果属性缺失则等待组件属性更新，重新从 `attributeChangedCallback` 开始执行，执行过程上面已总结
+- 而 `connectedCallback`，除了重新挂载以外，例如：`adopt`，在后续过程中不再执行
+
+`handleConnected` 执行流程：
+
+- 应用名和连接都存在才会执行
+- 检查是否开启 `shadowDom`，在环境允许的情况下开启，模式为 `open`，允许外部访问
+- 在 `ssr` 环境下更新应用连接，注 ⑨
+- 通过 `appInstanceMap` 将应用取出来，如果提取不出来创建实例 `handleCreateApp`
+- 根据情况修改实例，创建和修改都在下面总结
+
+> 注 ⑨：更新 `url`
+>
+> - `getDisposeResult` 检查是否开启 `ssr`，没有责将 `ssrUrl` 设为空，否则往下看
+> - 判断是否开启虚拟路由系统：`disable-memory-router`
+> - 如果是虚拟路由，`CompletionPath` 将真实路由的 `pathname` + `search` 和 应用连接，组合成为 `ssrUrl`
+> - 否则将从现有的浏览器连接中获取路由
+>
+> 从浏览器提取路由：
+>
+> - `getNoHashMicroPathFromURL` 使用应用的 `name` 和 `url` 从浏览器地址中提取路由
+> - 如果提取失败，`getDefaultPage` 拿默认渲染的页面
+> - 将默认渲染的页面和应用 `url` 创建 `ssrUrl`
+>
+> 在当前版本中 `ssrUrl` 优先级高于 `url`，但是在 `keep-alive` 下比对连接，不用考虑 `ssrUrl`
+
+`handleCreateApp` 创建实例，先根据应用名获取实例，3 个情况：
+
+- 实例存在且是预加载 `isPrerender`，当前对象中直接注销应用：`unmount`，之后再创建应用 `createAppInstance`
+- 实例存在不是预加载，彻底销毁应用 `actionsForCompletelyDestroy`，之后再创建应用 `createAppInstance`
+- 实例不存在，直接创建应用 `createAppInstance`
+
+在 `CreateApp` 中会重新设置实例 `appInstanceMap`
+
+修改实例前会先拿到应用信息，和当前的信息进行比对：
+
+- 如果应用已隐藏，且修改的应用 `url` 一样，重新连接应用：`handleShowKeepAliveApp`
+- 如果 `url` 都一样，当前应用已卸载，或是预加载应用且核心一致，注 ⑩，直接挂载：`this.handleMount(oldApp)`
+- 否则如果应用是预加载或者已卸载，重新创建一个代替原来的应用：`handleCreateApp`
+- 以上情况都不是直接报错
+
+> 注 10：核心信息包括：`scopecss`、`useSandbox`、`iframe`
+
+再次带入场景，修改一个已挂载的应用 `attributeChangedCallback`，会有两种情况：
+
+1. 修改的是 `url` 或 `name`，并且这个使用应用没有挂载，注 ⑩
+2. 还是修改同样的属性，但应用肯定是挂载了或预加载了
+
+> 注 ⑩：因为判断条件是，要么修改的属性值为 `false`，要么应用没加载 `connectStateMap`，这两个任意条件满足都不会挂载
+
+得出下面结论：
+
+- 没挂载的情况执行 `handleConnected`
+- 挂载了执行 `handleAttributeUpdate`，不会执行 `handleConnected` 流程上面描述了
+- 这样无论是应用新增，还是非挂载应用挂载、还是重新加载，都保证能够顺利通过 `handleConnected`
+
+#### 3.2 `handleDisconnected` 卸载操作
+
+- `appInstanceMap` 先拿到应用信息，确保应用存在、没有被卸载、不是隐藏
+- 如果是 `keep-alive` 仅下线应用，保活
+- 否则卸载应用 `this.unmount(destroy, callback)`
+
+至此整个 `MicroAppElement` 基本说完，大致分了 3 个步骤：
+
+1. 挂载和卸载：`connectedCallback`、`disconnectedCallback`
+2. 监听属性变化：`attributeChangedCallback`
+3. 首次执行加载和执行卸载：`handleConnected`、`handleDisconnected`
+
+---- 分割线 ----
+
+### `CreateApp` 创世应用类
+
+在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建
+
+目录：`create_app.ts` - `CreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts)]
+
+参数：
+
+- `options`：`CreateAppParam` 类型，从 `start` 中提取出来的，建议参考文档
