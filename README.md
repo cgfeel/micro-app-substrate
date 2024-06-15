@@ -189,9 +189,14 @@
 > 原理：
 >
 > - 空闲时间分别利用 `fetchGlobalResources` 加载全局资源
-> - 在函数中通过 `fetchSource` 直接 `fetch` 资源后通过 `promiseStream` 作为数据流处理
+> - 在函数中通过 `fetchSource` 直接 `fetchSource` 资源后通过 `promiseStream` 迭代数据流分别处理
 > - 将拿到的资源按照 `js` 和 `css` 分类分别通过 `sourceHandler.setInfo` 记录
 > - 在 `sourceHandler` 中将收到的数据记录为一个 `map` 对象
+>
+> `fetchSource` 原理：
+>
+> - 清空当前运行时的应用名
+> - 如果 `start` 提供了 `fetch` 优先使用，否则使用 `window.fetch`
 >
 > 注 ⑦：
 >
@@ -366,15 +371,78 @@
 
 在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建。
 
-目录：`create_app.ts` - `CreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts)]
+目录：`create_app.ts` - `CreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L59)]
 
 参数：
 
-- `options`：`CreateAppParam` 类型，从 `start` 中提取出来的，建议参考文档
+- `options`：`CreateAppParam` 类型
 
 `CreateApp` 的主要作用是：
 
 - 理由拿到的信息加载资源
 - 启动沙箱
-- 加载应用
+- 创建应用
+
+设置的信息包含：
+
 - 将自身对象添加到映射表中：`appInstanceMap`
+- 加载的信息建议直接读源码 [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L99)]
+- 加载资源前先设置一个对象 `this.source`
+- 之后分别开始加载资源 `loadSourceCode`、创建沙箱 `createSandbox`
+
+其中 `this.source` 增加了 `html` 为一个字符串，`css` 和 `js` 也由 `map` 改为了 `set`
+
+### `loadSourceCode` 加载资源
+
+- 设置应用状态 `setAppState`
+- `HTMLLoader` 加载资源
+
+**`HTMLLoader`加载资源：**
+
+- `getInstance` 返回单例
+- `run`：执行加载和格式化的逻辑
+
+加载的本质还是 `fetch`：
+
+- 拿到应用 `name` 和 `url`
+- `isTargetExtension` 判断加载的资源是不是 `js`
+- 如果是 `js` 资源，将其包裹成一个子应用，否则通过 `fetchSource` 加载资源，见注 ⑥
+- 如果加载遇到了问题，向应用抛出加载错误：`app.onLoadError(e)`
+- 如果获取不到内容，向应用抛出错误：`app.onerror(new Error(msg))`
+- 否则将拿到的资源、链接、应用名，通过 `formatHTML` 格式化
+- 将格式化后的数据通过传过来的回调函数进行处理，这里是：`extractSourceDom`
+
+**`formatHTML`格式化：**
+
+- 将拿到的链接、资源、应用名、插件传给 `processHtml` 处理并返回资源，注 ⑪
+- 替换 `html` 资源中的 `head` 为 `micro-app-head`
+- 替换 `html` 资源中的 `body` 为 `micro-app-body`
+
+> 注 ⑪：
+>
+> - `processHtml` 会提取所有全局的 `plugin`，和当前指定的 `plugin`
+> - 然后通过 `reduce` 遍历 `plugin` 集合
+> - 如果 `pllugin` 是一个对象，且包含了 `processHtml` 方法
+> - 将获取的资源传入进去处理
+
+在启动应用中会有 2 处用到 `HTMLLoader`：
+
+- 启动时预加载
+- 创建应用加载资源
+
+> **留个疑问：**
+>
+> 并没有找到 `micor-app` 的缓存，无论是否预加载都会重复加载，带入场景来看吧。
+>
+> 假定在 `start` 时候预计在应用：
+>
+> - 由 `preFetch` 发起微任务：`preFetchInSerial` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
+> - 在微任务中创建应用 `CreateApp`，然后开始：`loadSourceCode`
+>
+> 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的，当然这是个小概率事件。
+>
+> 然后参考上面第 2 个场景，挂载应用：
+>
+> - `attributeChangedCallback` - `connectedCallback` - `handleConnected`
+> - 预加载的应用，直接拿来修改，
+> -
