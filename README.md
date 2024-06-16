@@ -145,9 +145,10 @@
 - `initGlobalEnv`：将当前环境下的 `global` 做一份备份，注 ④
 - 确保真实 `window` 是否中还没有创建自定义的 `tagName`
 
-> 注 ④：
+> 注 ④ `global_env.ts` - `initGlobalEnv` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/libs/global_env.ts#L65)]：
 >
 > - 将 `window`、`document`、`Document` 上的属性和方法拷贝到 `globalEnv` 中
+> - 创建一个 `supportModuleScript` 用于判断是否支持 `Module Scripts`，加载应用资源时会用到
 > - 创建一个 `Image` 的 `proxy` 对象，用于在创建时使用微应用的名称添加一个属性 `__MICRO_APP_NAME__`
 > - 给 `window` 注入一个全局属性 `__MICRO_APP_BASE_APPLICATION__`
 > - 通过 `rejectMicroAppStyle` 创建一个 `style` 标签，将所有 `tagName` 和 `micro-app-body` 作为块级元素，隐藏 `micro-app-head`
@@ -392,12 +393,14 @@
 
 其中 `this.source` 增加了 `html` 为一个字符串，`css` 和 `js` 也由 `map` 改为了 `set`
 
-### `loadSourceCode` 加载资源
+### 1. `loadSourceCode` 加载资源
 
 - 设置应用状态 `setAppState`
 - `HTMLLoader` 加载资源
 
-**`HTMLLoader`加载资源：**
+#### 1.1. `HTMLLoader` 加载资源：
+
+目录：`html.ts` - `HTMLLoader` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/loader/html.ts#L10)]
 
 - `getInstance` 返回单例
 - `run`：执行加载和格式化的逻辑
@@ -412,11 +415,13 @@
 - 否则将拿到的资源、链接、应用名，通过 `formatHTML` 格式化
 - 将格式化后的数据通过传过来的回调函数进行处理，这里是：`extractSourceDom`
 
-**`formatHTML`格式化：**
+**`formatHTML` 格式化：**
 
 - 将拿到的链接、资源、应用名、插件传给 `processHtml` 处理并返回资源，注 ⑪
 - 替换 `html` 资源中的 `head` 为 `micro-app-head`
 - 替换 `html` 资源中的 `body` 为 `micro-app-body`
+
+关于加载有一点需要强调，`HTMLLoader` 将所有的连接都当做一个微应用来加载 `html`，当加载的是 `js` 资源也会将其包裹成子应用进行加载
 
 > 注 ⑪：
 >
@@ -430,19 +435,59 @@
 - 启动时预加载
 - 创建应用加载资源
 
-> **留个疑问：**
+带入场景来看吧，预加载应用后加载应用：
+
+- `start` 时 `preFetch` 发起预加载微任务，详细流程见 `microApp.start` 总结
+- 流程：`preFetchInSerial` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
+
+再加载应用，先从属性修改开始：
+
+- 详细流程见 `defineElement` 总结
+- 流程：`attributeChangedCallback` - `connectedCallback` - `handleConnected`
+- 拿到预加载的应用，`url` 没变，核心配置没变，又是预加载：`isPrefetch`
+- 直接发起挂载应用：`this.handleMount(oldApp)`
+- 设置应用状态 `appStates.BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
+- 通过 `CreateApp` 的 `mount` 挂载应用
+- 从而略过再次加载资源、启动沙箱
+
+> 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的。
+
+#### 1.2. `extractSourceDom` 成功加载资源回调：
+
+回到 `CreateApp.loadSourceCode`，加载资源时提供一个资源加载成功后的回调 `extractSourceDom`，用于提取 `link` 和 `script`，并绑定 `style` 的 `scope`
+
+目录：`index.ts` - `extractSourceDom` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/index.ts#L82)]
+
+- 先通过 `(new DOMParser()).parseFromString` 解析加载的 `html` 资源，注 ⑫
+- 查找 `micro-app-head` 和 `micro-app-body`，如果都不存在报错返回
+- 使用 `flatChildren` 递归处理每一个子集元素，注 ⑬
+
+> 注 ⑫：优先使用沙箱 `this.sandBox.proxyWindow.DOMParser`
 >
-> 并没有找到 `micor-app` 的缓存，无论是否预加载都会重复加载，带入场景来看吧。
+> 注 ⑬：
 >
-> 假定在 `start` 时候预计在应用：
+> - 通过获取的资源 `wrapElement`，应用 `app`，头部 `microAppHead`，集合 `fiberStyleTasks`
+> - 想获取每次递归资源的子集转换成数组：`Array.from(parent.children)`
+> - 遍历 `children` 迭代递归 `flatChildren`
+> - 拆分每一个 `children` 的 `dom`，分 4 类处理：`link`、`style`、`script`、`image`
 >
-> - 由 `preFetch` 发起微任务：`preFetchInSerial` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
-> - 在微任务中创建应用 `CreateApp`，然后开始：`loadSourceCode`
+> 处理 `link`：
 >
-> 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的，当然这是个小概率事件。
+> - 如果元素包含 `exclude` 属性，或者使用 `pllugin` 的 `excludeChecker` 排除，注释掉
+> - 如果元素包含 `ignore` 属性，或者使用 `pllugin` 的 `ignoreChecker` 排除，这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释，并汇总信息到 `linkInfo`，不包含则忽略
+> - 否则就修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
 >
-> 然后参考上面第 2 个场景，挂载应用：
+> 处理 `style`:
 >
-> - `attributeChangedCallback` - `connectedCallback` - `handleConnected`
-> - 预加载的应用，直接拿来修改，
-> -
+> - 如果默认的样式隔离，且没有 `ignore` 属性，通过 `injectFiberTask` 队列调用 `scopedCSS` 将修改作用域的样式添加到 `fiberStyleTasks`
+> - 如果元素包含 `exclude` 替换成注释，其他情况不做考虑
+>
+> 处理 `script`：可以按照下面思路来解读
+>
+> - 只看 `replaceComment` 有 5 条，那么无论哪种结果都是用注释代替 `script`
+> - 对于带有链接的 `script` 会 `remote`，将获取的信息最终汇总到 `sourceCenter`
+> - 对于 `inner script` 将信息直接汇总到 `sourceCenter`
+>
+> 处理 `image`：
+>
+> - 修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
