@@ -461,6 +461,7 @@
 - 先通过 `(new DOMParser()).parseFromString` 解析加载的 `html` 资源，注 ⑫
 - 查找 `micro-app-head` 和 `micro-app-body`，如果都不存在报错返回
 - 使用 `flatChildren` 递归处理每一个子集元素，注 ⑬
+- 使用 `serialExecFiberTasks` 将 `flatChildren` 队列执行，过程见下方注解
 
 > 注 ⑫：优先使用沙箱 `this.sandBox.proxyWindow.DOMParser`
 >
@@ -492,14 +493,15 @@
 >
 > - 修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
 >
-> 额外说下 `fiberStyleTasks`，用途是将修改 `css` 作用的方法，域封装在一个微任务队列中：
+> 额外说下 `fiberStyleTasks`，用途是将修改 `css` 作用域的方法，封装在一个微任务队列中：
 >
 > - 先通过 `injectFiberTask` 将队列 `fiberStyleTasks` 传过去
-> - 一同传过去的还有修改 `css` 作用的方法 `scopedCSS`
+> - 一同传过去的还有修改 `css` 作用域的方法 `scopedCSS`
 > - 返回的类型是 `() => promise<void>`，方便在后面迭代队列依次执行
 >
 > 执行 `injectFiberTask` 流程如下：
 >
-> - 拿到 `() => promise<void>`，执行并返回 `promise`
+> - 拿到 `() => promise<void>`，执行 `promise`
 > - `promise` 中通过 `requestIdleCallback` 将 `resolve` 传给 `callback` 并执行
-> - `callback` 中先修改 `css` 的作用域 `scopedCSS`，然后通过 `resolve(void)` 返回便于后面的任务继续执行
+> - `callback` 中先修改 `css` 的作用域 `scopedCSS`
+> - 然后通过 `resolve(void)` 返回最初函数中的 `promise`，以便后续队列执行
