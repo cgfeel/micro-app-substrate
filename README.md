@@ -460,17 +460,28 @@
 
 - 先通过 `(new DOMParser()).parseFromString` 解析加载的 `html` 资源，注 ⑫
 - 查找 `micro-app-head` 和 `micro-app-body`，如果都不存在报错返回
-- 使用 `flatChildren` 递归处理每一个子集元素，注 ⑬
+- 创建一个 `fiberStyleTasks` 用于收集加载的样式队列，注 ⑬
+- 使用 `flatChildren` 递归处理每一个子集元素，注 ⑭
 - 使用 `serialExecFiberTasks` 将 `flatChildren` 队列执行，过程见下方注解
 
 > 注 ⑫：优先使用沙箱 `this.sandBox.proxyWindow.DOMParser`
 >
-> 注 ⑬：
+> 注 ⑬：`fiberStyleTasks` 添加要求要么预加载 `isPrefetch`、要么 `fiber`
+>
+> - 假定不预加载，在 `CreateApp` 找 `fiber` 有两处
+> - 第一处初始化 `false`，第二处 `mount` 更新
+> - 这样如果应用不是预加载将不会使用队列 `fiberStyleTasks` 来收集 `inner style`
+> - 而是立即执行每一个 `scopedCSS`
+> - 这种情况 `serialExecFiberTasks` 返回的 `fiberStyleResult` 也是 `null`
+>
+> 注 ⑭：
 >
 > - 通过获取的资源 `wrapElement`，应用 `app`，头部 `microAppHead`，集合 `fiberStyleTasks`
 > - 想获取每次递归资源的子集转换成数组：`Array.from(parent.children)`
 > - 遍历 `children` 迭代递归 `flatChildren`
 > - 拆分每一个 `children` 的 `dom`，分 4 类处理：`link`、`style`、`script`、`image`
+>
+> 关于：
 >
 > 处理 `link`：
 >
