@@ -395,6 +395,8 @@
 
 ### 1. `loadSourceCode` 加载资源
 
+目录：`create_app.ts` - `loadSourceCode` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L127)]
+
 - 设置应用状态 `setAppState`
 - `HTMLLoader` 加载资源
 
@@ -463,6 +465,11 @@
 - 创建一个 `fiberStyleTasks` 用于收集加载的样式队列，注 ⑬
 - 使用 `flatChildren` 递归处理每一个子集元素，注 ⑭
 - 使用 `serialExecFiberTasks` 将 `flatChildren` 队列执行，过程见下方注解
+- 如果应用加载过程中获取到 `css` 资源，通过 `fetchLinksFromHtml` 挨个获取
+- 如果应用加载过程中获取到 `js` 资源，通过 `fetchScriptsFromHtml` 挨个获取
+- 加载完资源最终会触发 `app.onLoad`
+
+在 `app.onLoad` 中只判断资源是否加载完毕，加载完毕执行 `mount`
 
 > 注 ⑫：优先使用沙箱 `this.sandBox.proxyWindow.DOMParser`
 >
@@ -486,7 +493,9 @@
 > 处理 `link`：
 >
 > - 如果元素包含 `exclude` 属性，或者使用 `pllugin` 的 `excludeChecker` 排除，注释掉
-> - 如果元素包含 `ignore` 属性，或者使用 `pllugin` 的 `ignoreChecker` 排除，这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释，并汇总信息到 `linkInfo`，不包含则忽略
+> - 如果元素没有包含 `ignore` 属性，或者没有使用 `pllugin` 的 `ignoreChecker` 排除
+> - 这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释，不包含责跳过下面操作
+> - 并汇总信息到 `linkInfo`，同时将连接添加到 `app.source.links.add()` 用于后续队列加载
 > - 否则就修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
 >
 > 处理 `style`:
@@ -496,9 +505,11 @@
 >
 > 处理 `script`：可以按照下面思路来解读
 >
-> - 只看 `replaceComment` 有 5 条，那么无论哪种结果都是用注释代替 `script`
+> - 只看 `replaceComment` 有 5 条，无论哪种结果都是用注释代替 `script`
 > - 对于带有链接的 `script` 会 `remote`，将获取的信息最终汇总到 `sourceCenter`
+> - 同时将连接添加到 `app.source.scripts.add()` 用于后续队列加载
 > - 对于 `inner script` 将信息直接汇总到 `sourceCenter`
+> - 同时添加一个随机字符到 `app.source.scripts.add()`
 >
 > 处理 `image`：
 >
@@ -516,3 +527,89 @@
 > - `promise` 中通过 `requestIdleCallback` 将 `resolve` 传给 `callback` 并执行
 > - `callback` 中先修改 `css` 的作用域 `scopedCSS`
 > - 然后通过 `resolve(void)` 返回最初函数中的 `promise`，以便后续队列执行
+
+### 2. `loadSourceCode` 加载资源
+
+目录：`create_app.ts` - `createSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L757)]
+
+- 默认开启 `sandbox`，且还未初始化
+- 根据选择决定初始化 `iframe` 沙箱还是默认沙箱
+
+#### 2.1. `IframeSandbox` 沙箱
+
+目录：`index.ts` - `IframeSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/iframe/index.ts#L60)]
+
+静态属性和实例属性：
+
+```
+static activeCount = 0; // 活跃的沙盒数量
+private active = false; // 沙盒是否处于活跃状态
+private windowEffect!: CommonEffectHook; // window effect
+private documentEffect!: CommonEffectHook; // document effect
+private removeHistoryListener!: CallableFunction; // unique listener of popstate event for child app
+public escapeProperties: PropertyKey[] = []; // 可以逃逸到外部的全局变量集合，见 start 配置中的 escapeProperties
+public escapeKeys = new Set<PropertyKey>(); // 在卸载时清除的逃逸属性
+public deleteIframeElement: () => void; // 删除 iframe 元素的函数
+public iframe!: HTMLIFrameElement | null; // iframe 元素
+public sandboxReady!: Promise<void>; // 标记沙盒是否初始化完成的 Promise
+public proxyWindow: WindowProxy & microAppWindowType; // 代理 window
+public microAppWindow: microAppWindowType; // 微应用 window 对象
+public proxyLocation!: MicroLocation; // 子应用的代理Location对象
+public baseElement!: HTMLBaseElement; // 基本元素
+public microHead!: HTMLHeadElement; // 微应用 header
+public microBody!: HTMLBodyElement; // 微应用 body
+public appName: string; // 应用名称
+public url: string; // 应用 URL
+```
+
+`constructor` 构造函数：
+
+- 创建一个新的 `iframe`，并对 `iframe` 中的 `window`，`document`，`location` 等对象进行了“污染清理”，以阻止它们访问和修改宿主应用的相关对象
+- 同时对 `micro-app` `window` 的一些静态变量进行了初始化
+
+`createIframeElement` 创建 `iframe` 元素：
+
+- 根据应用名和浏览器路径创建并返回一个 `iframe` 元素
+- 并返回函数用于移除创建的 `iframe`
+
+`start` 启动沙箱：
+
+- 设置路由状态，添加历史记录监听器
+- 创建并应用 `base` 元素，以及对 `HTML` 元素和 `document` 进行补丁处理等逻辑
+
+`stop` 停止沙箱：
+
+- 撤销 `window`，`document` 的补丁，恢复路由状态，移除历史记录监听器
+- 移除 `iframe` 以及清理一些微应用的全局变量等操作。
+
+`createIframeTemplate` 创建 `iframe` 模板：
+
+- 清空 `iframe` 重塑内容
+
+`initStaticGlobalKeys` 注入方法到沙箱的 `window` 上：
+
+- 除了注入了全局对象外，通过 `EventCenterForMicroApp` 重新定义了相关的事件
+
+**总结：**
+
+`IframeSandbox` 类通过创建和管理 `iframe` 元素，隔离微应用的执行环境，提供了灵活且安全的沙盒机制。它包括：
+
+- 初始化和配置 `iframe` 元素。
+- 代理和修补窗口、文档、路由等。
+- 管理全局状态和事件。
+- 提供启动和停止沙盒的方法。
+
+#### 2.1. `IframeSandbox` 沙箱
+
+目录：`index.ts` - `WithSandBox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/with/index.ts#L93)]
+
+`WithSandBox` 基于 `BaseSandbox`，属性：
+
+- `rawWindowScopeKeyList`：只能分配给原生 `window` 的属性列表。
+- `staticEscapeProperties`：可以逃逸到原生 `window` 的属性列表。
+- `staticScopeProperties`：在子应用中作用域内的属性列表。
+- `scopeProperties`：在 `microAppWindow` 中作用域内的属性。
+- `escapeProperties`：可以逃逸到原生 `window` 的属性。
+- `injectedKeys`：新添加到 `microAppWindow` 的属性集合。
+- `escapeKeys`：逃逸到原生窗口的属性集合，在卸载时清除。
+- `sandboxReady`：表示沙箱是否初始化的 `Promise`。
