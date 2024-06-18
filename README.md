@@ -599,7 +599,7 @@ public url: string; // 应用 URL
 - 管理全局状态和事件。
 - 提供启动和停止沙盒的方法。
 
-#### 2.1. `WithSandBox` 默认沙箱
+#### 2.2. `WithSandBox` 默认沙箱
 
 目录：`index.ts` - `WithSandBox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/with/index.ts#L93)]
 
@@ -614,9 +614,10 @@ public url: string; // 应用 URL
 - `escapeKeys`：逃逸到原始 `window` 属性集合，在卸载时清除。
 - `sandboxReady`：表示沙箱是否初始化的 `Promise`。
 
-方法：
+`injectReactHMRProperty` 方法：
 
-- `injectReactHMRProperty`：根据环境添加 `React` 热模块替换 (`HMR`) 属性。
+- 构建函数唯一做的一件事，根据环境添加 `React` 热模块替换 (`HMR`) 属性
+- 需要特别处理的全局变量，比如 `__REACT_ERROR_OVERLAY_GLOBAL_HOOK__` 等
 
 `WithSandBox` 类属性：
 
@@ -632,4 +633,51 @@ public url: string; // 应用 URL
 
 - 初始化沙箱，修补必要的属性，并设置 `micro-app` 的环境。
 - 调用父类 `BaseSandbox` 的构造函数。
-- 使用 patchWith 方法修补环境，设置特殊属性、内存路由器、窗口和文档效果，并初始化全局键。
+- 使用 `patchWith` 方法修补环境，设置特殊属性、内存路由器、`window effect` 和 `document effect`，并初始化全局键。
+
+`start` 启动：
+
+- 激活沙箱并执行初始操作，如设置内存路由器和全局键。
+- 初始化路由状态，附加事件监听器，并修补全局键。
+
+`stop` 停止：
+
+- 停止沙箱，释放全局效果并清理资源。
+- 清除路由状态，并在需要时移除注入的键和事件监听器。
+
+`effect` 管理：
+
+- `recordAndReleaseEffect`：管理全局 `effect` 的记录和释放（事件、超时、数据监听器），以确保沙箱可以重置或恢复其状态。
+- `resetEffectSnapshot`：重置 `effect` 为干净状态，重置效果快照数据。
+- `recordEffectSnapshot`：捕获当前的全局 `effect` 状态、快照。
+- `rebuildEffectSnapshot`：恢复先前捕获的 `effect`，重建全局 `effect` 的快照。
+
+路由器和全局属性管理：
+
+- `initRouteState`：初始化路由状态。
+- `patchRouter`：设置子应用的自定义路由，设置内存路由器的 `location` 和 `history`。
+- `setHijackProperty`：设置 `micro-app window` 上的属性以确保隔离，确保某些属性（例如 `eval`，`Image`）在沙箱内受到控制。
+- `patchRequestApi`：重写 `fetch`、`XMLHttpRequest` 和 `EventSource` 以确保隔离，为 `micro-app` 隔离网络请求 API。
+- `clearRouteState`：清除路由状态。
+
+其他方法：
+
+- `initStaticGlobalKeys`：向 `micro-app window` 注入全局属性。
+- `releaseGlobalEffect`：清除全局事件、超时和数据监听器。
+- `getSpecialProperties`：从 `plugin` 中获取作用域和逃逸属性。
+- `setScopeProperties`：初始化 `micro-app window` 上的作用域属性。
+- `patchStaticElement`：在初始化时格式化所有 `HTML` 元素。
+- `actionBeforeExecScripts`：在执行脚本之前修补静态元素。
+- `setStaticAppState`：设置静态应用状态。
+
+**总结：**
+
+- `BaseSandbox` 和 `WithSandBox` 类为运行微前端提供了一个隔离环境。
+- 它们管理全局属性、事件、网络请求和路由，确保每个 `micro-app` 独立运行，不干扰全局环境或其他 `micro-app`。
+- 这种设置对于维护主应用的完整性和安全性，同时允许多个 `micro-app` 共存和正确运行非常重要。
+
+**额外补充：**
+
+- 无论 `IframeSandbox` 还是 `WithSandBox` 都是由 `CreateApp` 创建，并不对外提供
+- 不同的沙箱虽然特性有差异，但是最为沙箱公共特性的这部分居然没有统一的 `implements`
+- 作为使用者，可以不用逐行阅读沙箱源码，建议查看上方对提供的方法总结，只关注输入的参数和输出的类型
