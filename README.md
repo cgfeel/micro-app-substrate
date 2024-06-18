@@ -599,17 +599,37 @@ public url: string; // 应用 URL
 - 管理全局状态和事件。
 - 提供启动和停止沙盒的方法。
 
-#### 2.1. `IframeSandbox` 沙箱
+#### 2.1. `WithSandBox` 默认沙箱
 
 目录：`index.ts` - `WithSandBox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/with/index.ts#L93)]
 
 `WithSandBox` 基于 `BaseSandbox`，属性：
 
-- `rawWindowScopeKeyList`：只能分配给原生 `window` 的属性列表。
-- `staticEscapeProperties`：可以逃逸到原生 `window` 的属性列表。
+- `rawWindowScopeKeyList`：只能分配给原始 `window` 的属性列表。
+- `staticEscapeProperties`：可以逃逸到原始 `window` 的属性列表。
 - `staticScopeProperties`：在子应用中作用域内的属性列表。
 - `scopeProperties`：在 `microAppWindow` 中作用域内的属性。
-- `escapeProperties`：可以逃逸到原生 `window` 的属性。
+- `escapeProperties`：可以逃逸到原始 `window` 的属性。
 - `injectedKeys`：新添加到 `microAppWindow` 的属性集合。
-- `escapeKeys`：逃逸到原生窗口的属性集合，在卸载时清除。
+- `escapeKeys`：逃逸到原始 `window` 属性集合，在卸载时清除。
 - `sandboxReady`：表示沙箱是否初始化的 `Promise`。
+
+方法：
+
+- `injectReactHMRProperty`：根据环境添加 `React` 热模块替换 (`HMR`) 属性。
+
+`WithSandBox` 类属性：
+
+- `activeCount`：活跃沙箱的数量。
+- `active`：指示沙箱是否活跃。
+- `windowEffect`：`window effect`
+- `documentEffect`：`document effect`
+- `removeHistoryListener`：unique listener of popstate event for child app
+- `proxyWindow`：`window` 对象的代理。
+- `microAppWindow`：`micro-app window` 的代理目标。
+
+`constructor` 构造函数：
+
+- 初始化沙箱，修补必要的属性，并设置 `micro-app` 的环境。
+- 调用父类 `BaseSandbox` 的构造函数。
+- 使用 patchWith 方法修补环境，设置特殊属性、内存路由器、窗口和文档效果，并初始化全局键。
