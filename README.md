@@ -681,3 +681,79 @@ public url: string; // 应用 URL
 - 无论 `IframeSandbox` 还是 `WithSandBox` 都是由 `CreateApp` 创建，并不对外提供
 - 不同的沙箱虽然特性有差异，但是最为沙箱公共特性的这部分居然没有统一的 `implements`
 - 作为使用者，可以不用逐行阅读沙箱源码，建议查看上方对提供的方法总结，只关注输入的参数和输出的类型
+
+### 3. `mount` 挂载应用
+
+`app.onLoad` 加载完成后调用，一个对外公开的方法，做了 3 件事：
+
+- 资源没完成加载完成，触发事件并修改状态
+- 创建沙箱、更新状态
+- 挂载应用
+
+**`loadSourceLevel` 资源没完成加载完成：**
+
+主要用于外部调用，比如预加载应用时：
+
+- 设置容器 `container`，可能是一个用于挂载应用的 `DOM` 元素。
+- 禁用预渲染功能 `this.isPrerender`，这可能是因为代码正在尝试在资源加载完毕之前就开始挂载应用，这种情况下可能无法进行预渲染。
+- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `statechange`，并将应用的状态 `appState` 修改为 `LOADING`
+
+**创建沙箱、更新状态：**
+
+- `createSandbox` 上面已总结过了，构建时会尽可能创建沙箱，并存储在 `sandBox`，后续根据这个对象判断是否创建
+- `this.setAppState` 之后将应用的状态 `appState` 修改为 `BEFORE_MOUNT`
+
+**`nextAction` 挂载应用：**
+
+如果启用了沙箱 `this.sandBox`，会等沙箱完成启动后并且未卸载状态下挂载应用
+
+**特殊场景：**
+
+代码首先列出了一些特殊场景：
+
+1. 挂载发生在 `prerender` 执行挂载之前（加载资源）。
+2. 挂载发生在预渲染 `JavaScript` 执行期间。
+3. 挂载发生在预渲染 `JavaScript` 执行结束后。
+4. 挂载发生在 `prerender` 卸载后。
+
+**判断预渲染状态：**
+
+检查当前容器是否处于预渲染状态 `this.isPrerender`，并且是否是一个带有 `prerender` 属性的 `<div>` 元素。如果满足条件，执行以下操作：
+
+- `cloneContainer` 替换容器：当前容器为 `<div prerender='true'>`，将其替换为 `<micro-app>` 元素。
+- 注意：必须在 `this.sandBox.rebuildEffectSnapshot` 和 `this.preRenderEvents?.forEach((cb) => cb())` 执行之前进行替换。
+- `rebuildEffectSnapshot` 重建全局 `effect`：重建 `window`、`document` 和 `data center` 的 `effect` 事件。
+- 恢复之前记录的预渲染事件 `this.preRenderEvents?.forEach`。
+- 重置预渲染状态 `isPrerender`、`preRenderEvents`
+- 将路由信息附加到浏览器 URL `router.attachToURL`
+- 设置沙箱的预渲染状态 `this.sandBox?.setPreRenderState(false)`
+
+**常规挂载流程：**
+
+如果不处于预渲染状态，执行以下操作：
+
+- 设置容器、内联模式状态、纤程模式和路由模式：`container`、`inline`、`fiber`、`routerMode`
+- 创建并派发 `BEFOREMOUNT` 生命周期事件，如果是预渲染将事件插入 `preRenderEvents` 不执行
+- 将应用状态设置为 `MOUNTING`。
+- 向微应用派发 `statechange` 事件，通知应用状态变化。
+- 根据 `umdMode` 决定是深度克隆还是浅克隆容器
+- 启动沙箱 `this.sandBox?.start`
+- 根据 `umdMode` 执行脚本
+
+**不是 `umdMode`：**
+
+- 更新 `HTML` 元素信息，并执行脚本。
+- 在所有脚本执行完毕后，如果是 `UMD` 模式，获取并调用挂载钩子函数；否则，处理常规挂载完成。
+
+**`umdMode` 模式：**
+
+- 重建全局 `effect` 的快照：`this.sandBox?.rebuildEffectSnapshot`
+- 调用 `UMD` 模式下的挂载钩子函数：`handleMounted`
+- 处理挂载完成逻辑，如果出现错误，记录错误日志。
+
+**执行脚本补充：**
+
+- 无论是不是 `umd` 模式，最终都会执行 `handleMounted`
+- 不同的是 `isFinished` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行
+- 不是 `umd` 模式，需要从代理的 `window` 对象上获取 `mount` 和 `unmount`
+- 以便在处理 `handleMounted` 前完成挂载
