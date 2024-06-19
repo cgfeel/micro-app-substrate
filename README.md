@@ -368,7 +368,7 @@
 
 ---- 分割线 ----
 
-### `CreateApp` 创世应用类
+## `CreateApp` 创建应用类
 
 在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建。
 
