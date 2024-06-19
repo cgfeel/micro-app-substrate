@@ -368,7 +368,7 @@
 
 ---- 分割线 ----
 
-## `CreateApp` 创建应用类
+### `CreateApp` 创建应用类
 
 在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建。
 
@@ -393,14 +393,14 @@
 
 其中 `this.source` 增加了 `html` 为一个字符串，`css` 和 `js` 也由 `map` 改为了 `set`
 
-### 1. `loadSourceCode` 加载资源
+#### 1.1. `loadSourceCode` 加载资源
 
 目录：`create_app.ts` - `loadSourceCode` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L127)]
 
 - 设置应用状态 `setAppState`
 - `HTMLLoader` 加载资源
 
-#### 1.1. `HTMLLoader` 加载资源：
+#### 1.2. `HTMLLoader` 加载资源：
 
 目录：`html.ts` - `HTMLLoader` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/loader/html.ts#L10)]
 
@@ -454,7 +454,7 @@
 
 > 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的。
 
-#### 1.2. `extractSourceDom` 成功加载资源回调：
+#### 1.3. `extractSourceDom` 成功加载资源回调：
 
 回到 `CreateApp.loadSourceCode`，加载资源时提供一个资源加载成功后的回调 `extractSourceDom`，用于提取 `link` 和 `script`，并绑定 `style` 的 `scope`
 
@@ -528,14 +528,14 @@
 > - `callback` 中先修改 `css` 的作用域 `scopedCSS`
 > - 然后通过 `resolve(void)` 返回最初函数中的 `promise`，以便后续队列执行
 
-### 2. `loadSourceCode` 加载资源
+#### 2.1. `loadSourceCode` 加载资源
 
 目录：`create_app.ts` - `createSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L757)]
 
 - 默认开启 `sandbox`，且还未初始化
 - 根据选择决定初始化 `iframe` 沙箱还是默认沙箱
 
-#### 2.1. `IframeSandbox` 沙箱
+#### 2.2. `IframeSandbox` 沙箱
 
 目录：`index.ts` - `IframeSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/iframe/index.ts#L60)]
 
@@ -599,7 +599,7 @@ public url: string; // 应用 URL
 - 管理全局状态和事件。
 - 提供启动和停止沙盒的方法。
 
-#### 2.2. `WithSandBox` 默认沙箱
+#### 2.3. `WithSandBox` 默认沙箱
 
 目录：`index.ts` - `WithSandBox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/with/index.ts#L93)]
 
@@ -682,7 +682,7 @@ public url: string; // 应用 URL
 - 不同的沙箱虽然特性有差异，但是最为沙箱公共特性的这部分居然没有统一的 `implements`
 - 作为使用者，可以不用逐行阅读沙箱源码，建议查看上方对提供的方法总结，只关注输入的参数和输出的类型
 
-### 3. `mount` 挂载应用
+#### 3.1. `mount` 挂载应用
 
 `app.onLoad` 加载完成后调用，一个对外公开的方法，做了 3 件事：
 
