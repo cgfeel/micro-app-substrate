@@ -737,12 +737,12 @@ public url: string; // 应用 URL
 - 将应用状态设置为 `MOUNTING`。
 - 向微应用派发 `statechange` 事件，通知应用状态变化。
 - 根据 `umdMode` 决定是深度克隆还是浅克隆容器
-- 启动沙箱 `this.sandBox?.start`
+- 启动沙箱 `this.sandBox?.start`，详细见上方沙箱总结
 - 根据 `umdMode` 执行脚本
 
 **不是 `umdMode`：**
 
-- 更新 `HTML` 元素信息，并执行脚本。
+- 更新 `HTML` 元素信息，并在沙箱内执行脚本 `execScripts`
 - 在所有脚本执行完毕后，如果是 `UMD` 模式，获取并调用挂载钩子函数；否则，处理常规挂载完成。
 
 **`umdMode` 模式：**
@@ -751,9 +751,43 @@ public url: string; // 应用 URL
 - 调用 `UMD` 模式下的挂载钩子函数：`handleMounted`
 - 处理挂载完成逻辑，如果出现错误，记录错误日志。
 
-**执行脚本补充：**
+**沙箱执行脚本补充：**
 
 - 无论是不是 `umd` 模式，最终都会执行 `handleMounted`
 - 不同的是 `isFinished` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行
 - 不是 `umd` 模式，需要从代理的 `window` 对象上获取 `mount` 和 `unmount`
 - 以便在处理 `handleMounted` 前完成挂载
+
+**补充 `umdMode`：**
+
+- `CreateApp` 中的属性 `public`，默认是 `false`
+- 这就意味着创建应用的时候默认就“不是 `umdMode`”模式
+- `umdMode` 在外部没有做更新
+- 在内部也只有在 `execScripts` 内部挂载应用的时候更新为 `true`
+
+**补充 `execScripts`：**
+
+`execScripts` 只是一个队列方法，沙箱执行 `script` 还得看放入 `fiberScriptTasks` 的 `runScript`
+
+目录：`scripts.ts` - `execScripts` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L396)]
+
+参数：
+
+- `app`：`CreateApp` 实例
+- `initHook`：回调函数，带有两个属性 `moduleCount`、`errorCount`，用于判断是否完成加载的依据，作为参数回传给 `initHook`
+
+流程：
+
+- 先看结果，无论哪种结果都会执行 `initHook`
+- 遍历 `app.source.scripts`，有延迟塞入队列 `deferScriptPromise` 稍后加载
+- 没有延迟，知己通过 `injectFiberTask` 将沙箱执行放入队列 `fiberScriptTasks`
+- `deferScriptPromise` 存在队列，依次加载后将沙箱执行放入队列 `fiberScriptTasks`
+- 至此对于上面两种情况只要 `fiberScriptTasks` 存在队列，就会通过 `serialExecFiberTasks` 执行
+- 也就会在沙箱中执行 `script`
+- 但是对于上两种情况都没有拿到 `fiberScriptTasks` 的情况就只能回调执行 `initHook`
+
+**补充 `runScript`：**
+
+在沙箱内执行脚本的方法
+
+目录：`scripts.ts` - `runScript` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L481)]
