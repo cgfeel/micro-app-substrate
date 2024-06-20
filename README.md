@@ -223,7 +223,11 @@
 - 而只有当 `setAttribute` 设置的 `key` 是 `data` 的时候，才会遍历 `value` 更新 `this.data`，从而触发 `microApp.setDat`
 - 去除了 `MicroAppElement` 构造函数，给 `property` 打补丁也修改为 `patchElementAndDocument`，并挪动到沙箱中使用
 
-当然调整的肯定不止这些，我能看到的是课程和当前版本中的对比，下面罗列的方法都在 `MicroAppElement` 类中，复制关键词查阅
+> 修正 `property` 补丁：
+>
+> - `patchElementAndDocument` 在沙箱启动时 `start` 调用，详细见 `patch.ts` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/patch.ts#L346)]
+
+下面罗列的方法都在 `MicroAppElement` 类中，复制关键词查阅
 
 #### 1.1 `connectedCallback` 挂载组件：
 
@@ -564,8 +568,6 @@
 - 默认开启 `sandbox`，且还未初始化沙箱
 - 根据选择决定初始化 `iframe` 沙箱还是默认沙箱
 
-> 这里无论是 `iframe` 沙箱，还是默认提供的沙箱，都不再使用 `Proxy` 代理的方式，这里和珠峰课程内容不一样
-
 #### 2.2. `IframeSandbox` 沙箱
 
 目录：`index.ts` - `IframeSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/sandbox/iframe/index.ts#L60)]
@@ -602,6 +604,23 @@ public url: string; // 应用 URL
 
 - 根据应用名和浏览器路径创建并返回一个 `iframe` 元素
 - 并返回函数用于移除创建的 `iframe`
+- 之后拿到 `ifrrame` 的 `window` 对象作为 `microAppWindow`
+- 复制 `microAppWindow` 你会看到 `patchIframe` 整个都在为 `microAppWindow` 打补丁
+
+`patchIframe` 打补丁：
+
+- `createIframeTemplate`：为 `iframe` 创建一个空的 `html` 模板
+- `getSpecialProperties`：将 `start` 时提供的 `plugins.escapeProperties` 逃逸的变量在沙箱中共享
+- `patchRouter`：根据应用信息，修正沙箱的 `location` 和子应用的 `history`
+- `patchWindow`：补充 `window` 属性 `patchWindowProperty`，`createProxyWindow` 创建一个 `proxy` 对象代理沙箱环境下的 `window`，`patchWindowEffect` 代理 `addEventListener`、`removeEventListener` 子应用和基座相同事件冲突
+- `patchDocument`：修正 `document` 的 `property`、`prototype`、`eventListener`
+- `patchElement`：修正 `iframe` 的 `Node`、以及 `Node` 相关的 `attribute`
+- `create static properties`：为微应用注入全局属性
+
+打补丁额外说明：
+
+- 构造函数只挂载了方法，`patchIframe` 返回一个 `promise` 会在 `mount` 挂载应用前执行
+- `iframe` 沙箱的 `document` 会在 `iframe` 初始化后重建
 
 `start` 启动沙箱：
 
@@ -665,6 +684,15 @@ public url: string; // 应用 URL
 - 初始化沙箱，修补必要的属性，并设置 `micro-app` 的环境。
 - 调用父类 `BaseSandbox` 的构造函数。
 - 使用 `patchWith` 方法修补环境，设置特殊属性、内存路由器、`window effect` 和 `document effect`，并初始化全局键。
+
+`patchWith` 和 `ifram` 沙箱一样是打补丁：
+
+- `getSpecialProperties`：将 `start` 时提供的 `plugins.escapeProperties` 逃逸的变量在沙箱中共享
+- `patchRouter`：根据应用信息，修正沙箱的 `location` 和子应用的 `history`
+- `patchWindow`：补充 `window` 属性 `patchWindowProperty`，`createProxyWindow` 创建一个 `proxy` 对象代理沙箱环境下的 `window`，`patchWindowEffect` 代理 `addEventListener`、`removeEventListener` 子应用和基座相同事件冲突
+- `patchDocument`：修正 `document` 的 `property`、`prototype`、`eventListener`
+- `patchElement`：修正 `iframe` 的 `Node`、以及 `Node` 相关的 `attribute`
+- `create static properties`：为微应用注入全局属性
 
 `start` 启动：
 
