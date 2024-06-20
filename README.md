@@ -791,3 +791,37 @@ public url: string; // 应用 URL
 在沙箱内执行脚本的方法
 
 目录：`scripts.ts` - `runScript` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L481)]
+
+参数：
+
+- `address`：脚本链接
+- `app`：微前端应用实例
+- `scriptInfo`：脚本源信息，包含脚本内容和其他元数据。
+- `callback`：回调函数
+- `replaceElement`：可选的 `HTMLScriptElement`，用于替换现有脚本元素。
+
+流程：
+
+- `actionsBeforeRunScript`：为 `window` 对象注入 `__MICRO_APP_PROXY_WINDOW__` 为当前活跃沙箱的 `proxyWindow`
+- 获取 `script` 信息 `appSpaceData`，以及沙箱类型 `sandboxType`
+- 根据获取的信息，在 `parsedCode` 不存在时通过 `bindScope` 补全，注 ⑮
+- 内联脚本通过 `runCode2InlineScript` 处理，注 ⑯
+- 非内联脚本通过 `runParsedFunction` 处理，注 ⑯
+
+> 注 ⑮：`bindScope` 只做一件事
+>
+> - 将提供的 `script` 脚本内容用 `function` 包裹成模块
+> - 用沙箱提供的 `proxyWindow` 作为参数，作为模块的 `window` 等对象
+>
+> 注 ⑯：`runCode2InlineScript`
+>
+> - 如果是内联 `script` 设置内容，否则设置 `src`
+> - 添加 `onload` 事件 `onloadHandler`
+> - 为 `script` 元素添加属性 `setConvertScriptAttr`
+>
+> 注 ⑯：`runParsedFunction`
+>
+> - 如果 `scriptInfo` 不存在对应的方法，通过 `getParsedFunction` 生成
+> - `getParsedFunction` 会优先查找 `scriptInfo.appSpace` 将其返回
+> - 如果没有则通过 `code2Function` 使用 `new Function` 生成执行函数
+> - 最终生成的函数通过 `getEffectWindow` 根据情况，传递 `window` 过去执行
