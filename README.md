@@ -465,7 +465,7 @@
 - 创建一个 `fiberStyleTasks` 用于收集加载的样式队列，注 ⑬
 - 使用 `flatChildren` 递归处理每一个子集元素，注 ⑭
 - 使用 `serialExecFiberTasks` 将 `flatChildren` 队列执行，过程见下方注解
-- 如果应用加载过程中获取到 `css` 资源，通过 `fetchLinksFromHtml` 挨个获取
+- 如果应用加载过程中获取到 `css` 资源，通过 `fetchLinksFromHtml` 挨个获取，注 ⑮
 - 如果应用加载过程中获取到 `js` 资源，通过 `fetchScriptsFromHtml` 挨个获取
 - 加载完资源最终会触发 `app.onLoad`
 
@@ -481,7 +481,7 @@
 > - 而是立即执行每一个 `scopedCSS`
 > - 这种情况 `serialExecFiberTasks` 返回的 `fiberStyleResult` 也是 `null`
 >
-> 注 ⑭：
+> 注 ⑭：`flatChildren`
 >
 > - 通过获取的资源 `wrapElement`，应用 `app`，头部 `microAppHead`，集合 `fiberStyleTasks`
 > - 想获取每次递归资源的子集转换成数组：`Array.from(parent.children)`
@@ -527,6 +527,34 @@
 > - `promise` 中通过 `requestIdleCallback` 将 `resolve` 传给 `callback` 并执行
 > - `callback` 中先修改 `css` 的作用域 `scopedCSS`
 > - 然后通过 `resolve(void)` 返回最初函数中的 `promise`，以便后续队列执行
+>
+> 注 ⑮：`fetchLinksFromHtml`
+>
+> 目录：`links.ts` - `fetchLinksFromHtml` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L124C17-L124C35)]
+>
+> - 转换资源 `app.source.links` 为数组
+> - 通过 `fetchLinkPromise` 将加载作为一个队列，队列加载中如果资源没有内容，使用 `fetchSource` 直接请求获取
+> - 根据 `fiberStyleResult` 决定是队列，还是立即执行
+> - 执行 `promiseStream` 队列，这里假定都是成功的
+> - 通过 `injectFiberTask` 将 `fetchLinkSuccess` 放入空闲时间执行
+> - 立即执行没有 `fiberStyleResult` 直接触发 `app.onLoad`
+> - 否则将 `app.onLoad` 添加到 `fiberLinkTasks` 队列最后，通过 `serialExecFiberTasks` 依次执行
+>
+> 说说 `fetchLinkSuccess`：
+>
+> 目录：`links.ts` - `fetchLinkSuccess` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L177)]
+>
+> 用途：
+>
+> - 微应用初始化时，将链接的占位符替换为实际的样式标签。通过确保在正确的时机和条件下执行，优化了微应用的资源加载和样式处理。
+>
+> 流程：
+>
+> - 获取链接信息：从 `sourceCenter` 中获取 `linkInfo` 对象，并将源代码赋值给 `linkInfo.code`
+> - 获取应用的 `appSpaceData` 和 `placeholder`
+> - 如果 `placeholder` 存在，创建一个新的 `style` 元素 `convertStyle`
+> - `handleConvertStyle` 转换样式
+> - 如果 `placeholder` 存在父节点，则用新的 `style` 标签替换 `placeholder`。否则，将 `style` 标签添加到 `microAppHead`。
 
 #### 2.1. `loadSourceCode` 加载资源
 
@@ -804,22 +832,22 @@ public url: string; // 应用 URL
 
 - `actionsBeforeRunScript`：为 `window` 对象注入 `__MICRO_APP_PROXY_WINDOW__` 为当前活跃沙箱的 `proxyWindow`
 - 获取 `script` 信息 `appSpaceData`，以及沙箱类型 `sandboxType`
-- 根据获取的信息，在 `parsedCode` 不存在时通过 `bindScope` 补全，注 ⑮
-- 内联脚本通过 `runCode2InlineScript` 处理，注 ⑯
-- 非内联脚本通过 `runParsedFunction` 处理，注 ⑯
+- 根据获取的信息，在 `parsedCode` 不存在时通过 `bindScope` 补全，注 ⑯
+- 内联脚本通过 `runCode2InlineScript` 处理，注 ⑰
+- 非内联脚本通过 `runParsedFunction` 处理，注 ⑱
 
-> 注 ⑮：`bindScope` 只做一件事
+> 注 ⑯：`bindScope` 只做一件事
 >
 > - 将提供的 `script` 脚本内容用 `function` 包裹成模块
 > - 用沙箱提供的 `proxyWindow` 作为参数，作为模块的 `window` 等对象
 >
-> 注 ⑯：`runCode2InlineScript`
+> 注 ⑰：`runCode2InlineScript`
 >
 > - 如果是内联 `script` 设置内容，否则设置 `src`
 > - 添加 `onload` 事件 `onloadHandler`
 > - 为 `script` 元素添加属性 `setConvertScriptAttr`
 >
-> 注 ⑯：`runParsedFunction`
+> 注 ⑱：`runParsedFunction`
 >
 > - 如果 `scriptInfo` 不存在对应的方法，通过 `getParsedFunction` 生成
 > - `getParsedFunction` 会优先查找 `scriptInfo.appSpace` 将其返回
