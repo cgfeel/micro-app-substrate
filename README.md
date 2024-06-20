@@ -557,12 +557,14 @@
 > - `handleConvertStyle` 转换样式
 > - 如果 `placeholder` 存在父节点，则用新的 `style` 标签替换 `placeholder`。否则，将 `style` 标签添加到 `microAppHead`。
 
-#### 2.1. `loadSourceCode` 加载资源
+#### 2.1. `createSandbox` 创建沙箱
 
 目录：`create_app.ts` - `createSandbox` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L757)]
 
-- 默认开启 `sandbox`，且还未初始化
+- 默认开启 `sandbox`，且还未初始化沙箱
 - 根据选择决定初始化 `iframe` 沙箱还是默认沙箱
+
+> 这里无论是 `iframe` 沙箱，还是默认提供的沙箱，都不再使用 `Proxy` 代理的方式，这里和珠峰课程内容不一样
 
 #### 2.2. `IframeSandbox` 沙箱
 
