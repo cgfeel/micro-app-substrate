@@ -185,7 +185,7 @@
 > - `preFetch` 在 `requestIdleCallback` 中起一个微任务
 > - 通过 `preFetchInSerial` 拍平并通过 `preFetchAction` 微任务队列加载：
 > - `preFetchAction` 返回一个 `promise`，在 `promise` 中通过 `requestIdleCallback` 空闲时间预加载每一个应用
-> - 在每一个微任务中只通过 `CreateApp` 创建微任务这一件事，这是一个内部的类，外部不可以导入使用
+> - 在每一个微任务中通过 `CreateApp` 创建微任务，这是一个内部的类，外部不可以导入使用
 > - `CreateApp` 构造函数中会用每个应用名，映射一张 `map` 表：`appInstanceMap`（后面会提到）
 >
 > `micro-app` 和 `qiankun` 都支持预加载，不同的是：
