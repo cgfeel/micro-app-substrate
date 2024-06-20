@@ -151,7 +151,7 @@
 
 准备工作，判断和设置环境：
 
-- 先判断环境：`isBrowser || !window.customElements`
+- 运行环境必须支持 `window` 和 `web component`：`isBrowser || !window.customElements`
 - 保证一个基座只启动 1 次 `hasInit`，通过即设置为 `true` 避免重复 `start`
 - 判断自定义 `tagName`
 - `initGlobalEnv`：将当前环境下的 `global` 做一份备份，注 ④
