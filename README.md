@@ -116,6 +116,18 @@
 
 ## `micro-app` 原理
 
+由于后面总结会很长，所以我将整个流程总结精简放在前面：
+
+1. `microApp.start` 配置项
+2. `MicroAppElement` 解析 `web-component` 组件
+3. `CreateApp` 创建应用
+4. `HTMLLoader` 获取资源，将其放到 `web-component` 中
+5. `extractSourceDom` 解析资源，将 `css` 通过作用域隔离
+6. 开启沙箱 `IframeSandbox` 或 `WithSandBox`，通过 `proxy` 作为 `JS` 沙箱
+7. 资源处理完毕回调 `onLoad` 触发 `mount`
+8. `execScripts` 在沙箱中执行脚本，`umd` 模式还需记录 `unmount`、触发子应用的 `mount`（和 `qiankun` 一样）
+9. 完成挂载触发 `afterMounted` 挂载完毕事件和通知
+
 `micro-app` 是基于 `web component`，在上面演示了 `web component` 特性。所以大致可以想到 `micro-app` 启动流程如下：
 
 - 去掉注册信息，无需关心接入协议
@@ -615,7 +627,7 @@ public url: string; // 应用 URL
 - `patchWindow`：补充 `window` 属性 `patchWindowProperty`，`createProxyWindow` 创建一个 `proxy` 对象代理沙箱环境下的 `window`，`patchWindowEffect` 代理 `addEventListener`、`removeEventListener` 子应用和基座相同事件冲突
 - `patchDocument`：修正 `document` 的 `property`、`prototype`、`eventListener`
 - `patchElement`：修正 `iframe` 的 `Node`、以及 `Node` 相关的 `attribute`
-- `create static properties`：为微应用注入全局属性
+- `initStaticGlobalKeys`：为微应用注入全局属性
 
 打补丁额外说明：
 
@@ -691,8 +703,14 @@ public url: string; // 应用 URL
 - `patchRouter`：根据应用信息，修正沙箱的 `location` 和子应用的 `history`
 - `patchWindow`：补充 `window` 属性 `patchWindowProperty`，`createProxyWindow` 创建一个 `proxy` 对象代理沙箱环境下的 `window`，`patchWindowEffect` 代理 `addEventListener`、`removeEventListener` 子应用和基座相同事件冲突
 - `patchDocument`：修正 `document` 的 `property`、`prototype`、`eventListener`
-- `patchElement`：修正 `iframe` 的 `Node`、以及 `Node` 相关的 `attribute`
-- `create static properties`：为微应用注入全局属性
+- `setMappingPropertiesWithRawDescriptor`：在 `microAppWindow` 对象上设置一些映射属性
+- `initStaticGlobalKeys`：为微应用注入全局属性
+
+> `setMappingPropertiesWithRawDescriptor` 生命 2 个对象 `topValue`、`parentValue`，如果 `iframe` 中分别表示 `top` 和 `parent`，否则统一等于 `window` 对象，然后将获取到的对象，为应用代理的 `microAppWindow` 赋值 `top` 和 `parent` 两个属性。最后遍历 `GLOBAL_KEY_TO_WINDOW` 数组中的每个键（`window`、`self`、`globalThis`），并在 `microAppWindow` 上定义这些属性。每个属性都通过 `createDescriptorForMicroAppWindow` 方法创建，并映射到 `this.proxyWindow`。
+
+打补丁额外说明：
+
+- 构造函数只挂载了方法，`patchIframe` 返回一个 `promise` 会在 `mount` 挂载应用前执行
 
 `start` 启动：
 
@@ -884,3 +902,30 @@ public url: string; // 应用 URL
 > - `getParsedFunction` 会优先查找 `scriptInfo.appSpace` 将其返回
 > - 如果没有则通过 `code2Function` 使用 `new Function` 生成执行函数
 > - 最终生成的函数通过 `getEffectWindow` 根据情况，传递 `window` 过去执行
+
+**补充 `handleMounted`：**
+
+目录：`create_app.ts` - `handleMounted` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L371)]
+
+- 挂载应用最后无论是不是 `umd` 格式都会执行这个方法
+- 最终都要执行 `dispatchAction`，不同的是预加载只是将方法放入队列 `preRenderEvents`，不会立即执行
+- 除此之外预加载应用还会通过 `recordAndReleaseEffect` 去记录沙箱快照、并清理沙箱 `window effect`、`document effect` 等
+
+`dispatchAction`：
+
+- 无论什么情况都会执行 `nextAction` 去调用 `actionsAfterMounted`
+- 如果有提供挂载的 `promise`，会等处理挂载之后再执行
+
+**补充 `actionsAfterMounted`：**
+
+应用挂载完毕后触发已挂载事件
+
+目录：`create_app.ts` - `actionsAfterMounted` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L397)]
+
+- 只接受未卸载的应用触发
+- 设置状态为 `MOUNTED`
+- `execMicroAppGlobalHook` 执行子应用的 `window.onmount` 钩子函数，通知子应用已经挂载。
+- `dispatchCustomEventToMicroApp` 向微应用派发 `statechange` 事件，通知其状态已变为 `MOUNTED`。
+- `dispatchCustomEventToMicroApp` 向微应用派发 `mounted` 事件，通知其已经挂载。
+- `dispatchLifecyclesEvent` 向父应用派发 `MOUNTED` 生命周期事件。
+- 如果应用是隐藏的（`Keep-alive` 模式），则记录并释放所有全局事件 `recordAndReleaseEffect`，确保其后台运行的特性。
