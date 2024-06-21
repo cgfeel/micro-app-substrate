@@ -322,6 +322,13 @@
 > - 如果 `start` 时提供了 `created` 优先触发
 > - 然后触发自定义事件 `created`
 
+关于源码中备注执行两次的问题：
+
+- 并非是因为 `name` 和 `url` 分别设置导致执行两次的问题，而是上面所说的
+- 当挂载一个自定义的 `web component` 的时候，会先响应属性的变化 `attributeChangedCallback`
+- 这个时候去拿 `connectedCount` 只能拿到上一个自定义元素，然后通过 `handleInitialNameAndUrl` 执行了第一次挂载
+- 之后挂载后在 `connectedCallback` 执行了第二次挂载
+
 #### 2.2 `disconnectedCallback` 卸载组件：
 
 - 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
@@ -336,12 +343,6 @@
 - `reload`：重新加载应用
 
 > 在珠峰课程里 `initialMount` 就是 `handleConnected`，只是版本不一样叫法不一样
-
-关于源码中执行两次的问题，并非是因为 `name` 和 `url` 分别设置导致执行两次的问题，而是上面所说的：
-
-- 当挂载一个自定义的 `web component` 的时候，会先响应属性的变化 `attributeChangedCallback`
-- 这个时候去拿 `connectedCount` 只能拿到上一个自定义元素，然后通过 `handleInitialNameAndUrl` 执行了挂载
-- 之后挂载后在 `connectedCallback` 执行了第二次
 
 `handleConnected` 执行流程：
 
