@@ -254,7 +254,7 @@
 
 #### 1.1 `connectedCallback` 挂载组件：
 
-- 自增 `this.connectedCount`
+- 自增 `this.connectedCount` 用于给每个自定义组件配置唯一的编号
 - 设置一个状态 `map`：`this.connectStateMap.set(cacheCount, true)`
 
 `defer` 添加一个微任务：
