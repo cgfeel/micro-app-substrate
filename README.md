@@ -279,7 +279,7 @@
 > - 因为同时还拿了 `this.name` 和 `this.url` 去判断，初始化时这两个值还是空值
 > - 然后触发 `handleInitialNameAndUrl`，这里会再次拿上次组件的 `connectedCount` 去执行一遍 `handleConnected`
 > - 好在 `handleConnected` 要求 `name` 和 `url` 这两个属性都存在有效值
-> - 但会引起重复创建的逻辑问题，所以开发人员也在 144 行备注：`TODO: 这里的逻辑可否再优化一下`
+> - 但会引起重复创建的逻辑问题，开发人员也在 144 行备注：`TODO: 这里的逻辑可否再优化一下`
 
 `handleAttributeUpdate` 更新已赋值且挂载的应用：
 
@@ -337,15 +337,11 @@
 
 > 在珠峰课程里 `initialMount` 就是 `handleConnected`，只是版本不一样叫法不一样
 
-现在可以带入场景来看了，假定有一个初始化的 `web-component`，首次加载如下：
+关于源码中执行两次的问题，并非是因为 `name` 和 `url` 分别设置导致执行两次的问题，而是上面所说的：
 
-- `attributeChangedCallback`：观察变化的属性
-- 设置 `name` 和 `url`，且 `this` 没有值，更新后发起挂载 `handleInitialNameAndUrl`
-- 由于应用并没有完成挂载 `this.connectStateMap` 导致无效
-- 生命周期来到已挂载：`connectedCallback`，记录 `this.connectStateMap`
-- 在微任务中检查到 `name` 和 `url`，发起首次挂载
-- 如果属性缺失则等待组件属性更新，重新从 `attributeChangedCallback` 开始执行，执行过程上面已总结
-- 而 `connectedCallback`，除了重新挂载以外，例如：`adopt`，在后续过程中不再执行
+- 当挂载一个自定义的 `web component` 的时候，会先响应属性的变化 `attributeChangedCallback`
+- 这个时候去拿 `connectedCount` 只能拿到上一个自定义元素，然后通过 `handleInitialNameAndUrl` 执行了挂载
+- 之后挂载后在 `connectedCallback` 执行了第二次
 
 `handleConnected` 执行流程：
 
