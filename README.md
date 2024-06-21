@@ -197,14 +197,16 @@
 >
 > 注 ⑥：`getGlobalAssets`
 >
+> 和 `systemjs` 导入资源一样 `systemjs-importmap`，可以作为加载子应用前将必要的依赖提前加载
+>
 > 目录：`prefetch.ts` - `getGlobalAssets` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L158)]
 >
 > 原理：
 >
 > - 空闲时间分别利用 `fetchGlobalResources` 加载全局资源
 > - 在函数中通过 `fetchSource` 直接 `fetchSource` 资源后通过 `promiseStream` 迭代数据流分别处理
-> - 将拿到的资源按照 `js` 和 `css` 分类分别通过 `sourceHandler.setInfo` 记录
-> - 在 `sourceHandler` 中将收到的数据记录为一个 `map` 对象
+> - 将拿到的资源按照 `js` 和 `css` 分类分别通过 `sourceCenter` 记录
+> - 在 `sourceCenter` 中将收到的数据记录为一个 `map` 对象
 >
 > `sourceCenter` 收集资源信息的对象，在后面加载应用资源也会提到
 >
