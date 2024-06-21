@@ -227,7 +227,7 @@
 > - 只修正子应用 `plugins.modules`，不修正 `plugins.global`
 > - 将不符合驼峰规范的 `key` 转换后，重新赋值并删除之前的 `key`
 
-### `defineElement` 自定义组件
+### `defineElement` 自定义组件 `MicroAppElement`
 
 原理和上面 `web component` 特性一样，在函数内部定义了一个类 `MicroAppElement`，并通过 `globalEnv.rawWindow.customElements.define` 创建自定义组件
 
