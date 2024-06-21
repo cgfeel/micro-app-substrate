@@ -116,7 +116,7 @@
 
 ## `micro-app` 原理
 
-由于后面总结会很长，所以我将整个流程总结精简放在前面：
+由于总结会很长，所以我将整个流程总结精简放在前面：
 
 1. `microApp.start` 配置项
 2. `MicroAppElement` 解析 `web-component` 组件
@@ -418,7 +418,7 @@
 
 ### `CreateApp` 创建应用类
 
-在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `<micro-app />` 来创建。
+在 `MicroAppElement` 中都会统一使用 `CreateApp` 这个类来创建应用。这个类不对外开放，不支持通过 `CreateApp` 手动创建应用，而是通过 `MicroAppElement.handleCreateApp` 来创建
 
 目录：`create_app.ts` - `CreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L59)]
 
