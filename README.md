@@ -349,8 +349,8 @@
 - 应用名和连接都存在才会执行
 - 检查是否开启 `shadowDom`，在环境允许的情况下开启，模式为 `open`，允许外部访问
 - 在 `ssr` 环境下更新应用连接，注 ⑨
-- 通过 `appInstanceMap` 将应用取出来，如果提取不出来创建实例 `handleCreateApp`
-- 如果提取应用根据情况修改实例
+- 通过 `appInstanceMap` 将应用取出来，如果提取应用根据情况修改实例
+- 如果提取不出来创建实例 `handleCreateApp`
 
 > 注 ⑨：更新 `url`
 >
