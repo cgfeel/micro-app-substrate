@@ -260,7 +260,7 @@
 
 - `attr`：`ObservedAttrName` 一个包含 `name` 和 `url` 的枚举
 - `_oldVal`：`string`，这里是有问题的，初始化的时候一定是 `null`
-- `newVal`: `string`，这里也是有问题的，我不提供属性不就是 `null` 了吗
+- `newVal`: `string`，这里也是有问题的，不提供属性时应该是 `null`
 
 如果当前修改的是 `url` 或 `name`，且值为空或者当前元素已卸载：
 
@@ -273,7 +273,7 @@
 
 `handleAttributeUpdate` 更新已赋值且挂载的应用：
 
-- 进入为任务前想设置 `this.isWaiting = true`，避免重复操作
+- 进入微任务前想设置 `this.isWaiting = true`，避免重复操作
 - 进入微任务后取消 `isWaiting` 状态
 - 查看当前元素上 `url` 和 `name` 都是有效值：`formatAppName(this.getAttribute("name"|"url"))`
 - 通过 `appInstanceMap` 将应用取出来在决定如何修改
