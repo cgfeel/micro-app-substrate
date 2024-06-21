@@ -454,7 +454,7 @@
 
 目录：`create_app.ts` - `loadSourceCode` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L127)]
 
-- 设置应用状态 `setAppState`
+- 设置应用状态为 `LOADING`
 - `HTMLLoader` 加载资源
 
 #### 1.2. `HTMLLoader` 加载资源：
