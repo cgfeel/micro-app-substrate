@@ -206,6 +206,15 @@
 > - 将拿到的资源按照 `js` 和 `css` 分类分别通过 `sourceHandler.setInfo` 记录
 > - 在 `sourceHandler` 中将收到的数据记录为一个 `map` 对象
 >
+> `sourceCenter` 收集资源信息的对象，在后面加载应用资源也会提到
+>
+> > 目录：`source_center.ts` - `createSourceCenter` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/source_center.ts#L31)]
+>
+> - 包含 2 个属性：`link` 记录 `css` 资源信息，`script` 收集脚本信息
+> - 每个属性包含 4 个方法：`setInfo` 设置信息，`getInfo` 获取信息，`hasInfo` 判断信息存在，`deleteInfo` 删除信息
+> - 每个方法都接受一个参数：`address` 资源路径，除此之外 `setInfo` 还需要提供资源信息 `info`
+> - 根据资源不同 `info` 的类型也有两个：`LinkSourceInfo`、`ScriptSourceInfo`，详细查看 `ts` 类型 [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/typings/global.d.ts#L112)]
+>
 > `fetchSource` 原理：
 >
 > - 清空当前运行时的应用名
