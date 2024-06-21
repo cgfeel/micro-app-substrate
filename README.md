@@ -252,30 +252,7 @@
 
 下面罗列的方法都在 `MicroAppElement` 类中，复制关键词查阅
 
-#### 1.1 `connectedCallback` 挂载组件：
-
-- 自增 `this.connectedCount` 用于给每个自定义组件配置唯一的编号
-- 设置一个 `map` 映射表：`this.connectStateMap.set(cacheCount, true)`，用于记录自定义组件销毁和挂载状态
-
-`defer` 添加一个微任务：
-
-- `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
-- 如果提供了应用名和连接，执行首次挂载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
-
-> 注 ⑧：使用当前元素、应用名、来创建 `created` 事件
->
-> - 先定位到元素的根元素上：`getRootContainer`
-> - 删除作用域中其他应用
-> - 将信息合并创建自定义 `created` 事件，并通过 `formatEventInfo` 捆绑事件对象元素
-> - 如果 `start` 时提供了 `created` 优先触发
-> - 然后触发自定义事件 `created`
-
-#### 1.2 `disconnectedCallback` 卸载组件：
-
-- 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
-- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-handledisconnected-卸载操作)]
-
-#### 2.1 `attributeChangedCallback` 观察属性修改：
+#### 1.1 `attributeChangedCallback` 观察属性修改：
 
 只观察 2 个属性：`name`、`url`，提供的值一个非空的字符，且和老的值不一样才会执行
 
@@ -307,9 +284,32 @@
 
 如果当前元素上 `name` 或 `url` 是空值，且 `name` 发生了变动：
 
-- 不去管应用状态，直接修改 `this.setAttribute`
+- 不去管应用状态，直接修改 `this.setAttribute('name', this.appName)`
 
-有了以上流程之后再来看挂载应用
+在 `web component` 组件类中，会先执行 `attributeChangedCallback` 然后挂载组件 `connectedCallback`
+
+#### 2.1 `connectedCallback` 挂载组件：
+
+- 自增 `this.connectedCount` 用于给每个自定义组件配置唯一的编号
+- 设置一个 `map` 映射表：`this.connectStateMap.set(cacheCount, true)`，用于记录自定义组件销毁和挂载状态
+
+`defer` 添加一个微任务：
+
+- `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
+- 如果提供了应用名和连接，执行首次挂载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
+
+> 注 ⑧：使用当前元素、应用名、来创建 `created` 事件
+>
+> - 先定位到元素的根元素上：`getRootContainer`
+> - 删除作用域中其他应用
+> - 将信息合并创建自定义 `created` 事件，并通过 `formatEventInfo` 捆绑事件对象元素
+> - 如果 `start` 时提供了 `created` 优先触发
+> - 然后触发自定义事件 `created`
+
+#### 2.2 `disconnectedCallback` 卸载组件：
+
+- 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
+- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-handledisconnected-卸载操作)]
 
 #### 3.1 `handleConnected` 首次加载
 
