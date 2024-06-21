@@ -260,7 +260,7 @@
 `defer` 添加一个微任务：
 
 - `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
-- 如果提供了应用名和连接，执行首次挂载 `handleConnected`，稍后总结
+- 如果提供了应用名和连接，执行首次挂载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
 
 > 注 ⑧：使用当前元素、应用名、`created` 来创建事件
 >
@@ -284,7 +284,7 @@
 - 如果是 `url`，格式化 `formatAppURL` 并更新值
 - 如果是 `name`，在格式化并更新值之前，要先更新：应用信息、元素信息、属性
 - 无论是更新 `url` 还是 `name`，只要当前元素已挂载，就会再次执行一遍挂载操作 `handleInitialNameAndUrl`
-- `handleInitialNameAndUrl` 中会根据应用启动状态，执行首次加载 `handleConnected`，稍后总结
+- `handleInitialNameAndUrl` 中会根据应用启动状态，执行首次加载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
 - 如果以上都不是且状态不是 `isWaiting`，创建一个微任务 `handleAttributeUpdate`
 - 否则不做任何操作
 
