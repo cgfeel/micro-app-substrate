@@ -302,7 +302,7 @@
 否则修改的 `name` 或 `url` 不同，开始修改应用信息：
 
 - 如果修改 `url`，卸载应用后再启动：`unmount` - `actionsForAttributeChange`
-- 否则看是否在线应用，断开连接后再启动：`actionsForAttributeChange` - `actionsForAttributeChange`
+- 否则看是否为 `keep-alive` 模式，断开连接后再启动：`handleHiddenKeepAliveApp` - `actionsForAttributeChange`
 - 其他情况参考第一条，区别在于不会在卸载时清除缓存
 
 如果当前元素上 `name` 或 `url` 是空值，且 `name` 发生了变动：
