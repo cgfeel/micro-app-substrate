@@ -386,10 +386,10 @@
 
 带入场景，修改已挂载的组件 `<micro-app />`， `attributeChangedCallback` 会有两种情况：
 
-1. 修改的是 `url` 或 `name`，这个组件在此之前因为缺失属性没有挂载应用，注 ⑩
+1. 修改的是 `url` 或 `name`，这个组件在此之前因为缺失属性没有挂载应用
 2. 修改组件属性，组件已挂载或已完成预加载
 
-> 注 ⑩：挂载组件并创建应用的前提是 `url` 和 `name` 这两个值都有效，缺少一个只能挂载组件不会创建应用
+> 挂载组件并创建应用的前提是 `url` 和 `name` 这两个值都有效，缺少一个只能挂载组件不会创建应用
 
 得出下面结论：
 
@@ -435,11 +435,20 @@
 设置的信息包含：
 
 - 将自身对象添加到映射表中：`appInstanceMap`
-- 加载的信息建议直接读源码 [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L99)]
+- 加载的信息，注 ⑩
 - 加载资源前先设置一个对象 `this.source`
 - 之后分别开始加载资源 `loadSourceCode`、创建沙箱 `createSandbox`
 
 其中 `this.source` 增加了 `html` 为一个字符串，`css` 和 `js` 也由 `map` 改为了 `set`
+
+> 注 ⑩：加载信息包含
+>
+> - 应用名称和链接：`name`、`url`
+> - 启用沙箱和样式作用域：`useSandbox`、`scopecss`
+> - 执行方式：`iframe` 沙箱、`inline` 内联执行 `srcipt`
+> - 路由模式：`routerMode`
+> - 容器 `container` 和 `ssrUrl`
+> - `isPrefetch` 预加载、`isPrerender` 与渲染、`prefetchLevel` 预加载等级
 
 #### 1.1. `loadSourceCode` 加载资源
 
