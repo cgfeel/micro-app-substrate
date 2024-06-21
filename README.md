@@ -241,9 +241,9 @@
 
 在当前版本的 `micro-app` 做了调整：
 
-- 在 `MicroAppElement` 中是有两个静态方法 `static get data` 和 `static set data`，不再提供给自定义组件 `<micro-app />` 使用
-- 而是作为 `MicroAppElement` 修改 `this.data` 值时触发，而只有 `setAttribute` 这一处，这是对外提供的
-- 而只有当 `setAttribute` 设置的 `key` 是 `data` 的时候，才会遍历 `value` 更新 `this.data`，从而触发 `microApp.setDat`
+- 在 `MicroAppElement` 中是有两个静态方法 `static get data` 和 `static set data`，不再提供给自定义组件 `<micro-app />` 直接通过组件属性使用 `<micro-app data={customData} />`
+- 而是作为 `MicroAppElement` 修改 `this.data` 值时触发，而只有 `setAttribute` 这一处，这个方法是对外提供的
+- 而只有当 `setAttribute` 设置的 `key` 是 `data` 的时候，才会遍历 `value` 更新 `this.data`，从而触发 `microApp.setData`
 - 去除了 `MicroAppElement` 构造函数，给 `property` 打补丁也修改为 `patchElementAndDocument`，并挪动到沙箱中使用
 
 > 修正 `property` 补丁：
