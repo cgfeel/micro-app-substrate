@@ -362,8 +362,8 @@
 > 从浏览器提取路由：
 >
 > - `getNoHashMicroPathFromURL` 使用应用的 `name` 和 `url` 从浏览器地址中提取路由
-> - 如果提取失败，`getDefaultPage` 拿默认渲染的页面
-> - 将默认渲染的页面和应用 `url` 创建 `ssrUrl`
+> - 如果提取失败，`getDefaultPage` 拿默认渲染的页面，将默认渲染的页面和应用 `url` 作为 `ssrUrl`
+> - 如果提取成功，直接拿 `getNoHashMicroPathFromURL` 返回的连接作为 `ssrUrl`
 >
 > 在当前版本中 `ssrUrl` 优先级高于 `url`，但是在 `keep-alive` 下比对连接，不用考虑 `ssrUrl`
 
