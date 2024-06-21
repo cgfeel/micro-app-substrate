@@ -195,7 +195,7 @@
 > - `micro-app` 可以设置加载等级：加载、执行、渲染，`qiankun` 并不支持，同样不支持的还有 `iframe` 沙箱
 > - 除此之外 `micro-app` 预加载还支持隔离、渲染等配置，而 `qiankun` 中需要通过手动加载 `loadMicroApp` 来实现，但手动加载并非预加载
 >
-> 注 ⑥：
+> 注 ⑥：`getGlobalAssets`
 >
 > 目录：`prefetch.ts` - `getGlobalAssets` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L158)]
 >
@@ -208,7 +208,7 @@
 >
 > `sourceCenter` 收集资源信息的对象，在后面加载应用资源也会提到
 >
-> > 目录：`source_center.ts` - `createSourceCenter` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/source_center.ts#L31)]
+> 目录：`source_center.ts` - `createSourceCenter` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/source_center.ts#L31)]
 >
 > - 包含 2 个属性：`link` 记录 `css` 资源信息，`script` 收集脚本信息
 > - 每个属性包含 4 个方法：`setInfo` 设置信息，`getInfo` 获取信息，`hasInfo` 判断信息存在，`deleteInfo` 删除信息
