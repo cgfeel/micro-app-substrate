@@ -424,13 +424,13 @@
 
 参数：
 
-- `options`：`CreateAppParam` 类型
+- `options`：`CreateAppParam` 类型 [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L45)]
 
 `CreateApp` 的主要作用是：
 
-- 理由拿到的信息加载资源
-- 启动沙箱
-- 创建应用
+- 利用拿到的信息加载资源
+- 启动沙箱，`iframe` 或者 `WithSandBox`（默认）
+- 创建应用 `mount`
 
 设置的信息包含：
 
