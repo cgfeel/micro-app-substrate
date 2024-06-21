@@ -382,7 +382,7 @@
 - 否则如果应用是预加载或者已卸载，重新创建一个代替原来的应用：`handleCreateApp`
 - 以上情况都不是直接报错
 
-> 注 10：核心信息包括：`scopecss`、`useSandbox`、`iframe`
+> 注 10：核心信息包括：`scopecss` 样式隔离、`useSandbox` 使用沙箱、`iframe` 使用 `iframe` 沙箱，全部是 `boolean` 类型
 
 带入场景，修改一个已挂载的应用 `attributeChangedCallback`，会有两种情况：
 
