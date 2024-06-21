@@ -378,9 +378,9 @@
 再说更新，修改实例前会先拿到应用信息，和当前的信息进行比对：
 
 - 如果应用已隐藏，且修改的应用 `url` 一样，重新连接应用：`handleShowKeepAliveApp`
-- 如果 `url` 都一样，当前应用已卸载，或是预加载应用且核心一致，注 ⑩，直接挂载：`this.handleMount(oldApp)`
+- 否则如果 `url` 都一样，当前应用已卸载，或是预加载应用且核心一致，注 ⑩，直接挂载：`this.handleMount(oldApp)`
 - 否则如果应用是预加载或者已卸载，重新创建一个代替原来的应用：`handleCreateApp`
-- 以上情况都不是直接报错
+- 以上情况都不是，而实例又存在的情况直接报错
 
 > 注 10：核心信息包括：`scopecss` 样式隔离、`useSandbox` 使用沙箱、`iframe` 使用 `iframe` 沙箱，全部是 `boolean` 类型
 
