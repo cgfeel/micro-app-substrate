@@ -256,6 +256,12 @@
 
 只观察 2 个属性：`name`、`url`，提供的值一个非空的字符，且和老的值不一样才会执行
 
+参数：
+
+- `attr`：`ObservedAttrName` 一个包含 `name` 和 `url` 的枚举
+- `_oldVal`：`string`，这里是有问题的，初始化的时候一定是 `null`
+- `newVal`: `string`，这里也是有问题的，我不提供属性不就是 `null` 了吗
+
 如果当前修改的是 `url` 或 `name`，且值为空或者当前元素已卸载：
 
 - 如果是 `url`，格式化 `formatAppURL` 并更新值
