@@ -397,16 +397,21 @@
 - 挂载了执行 `handleAttributeUpdate`
 - 这样无论是新增，还是修改组件属性、还是重载，都能保证通过 `handleConnected` 创建或挂载应用
 
-#### 3.2 `handleDisconnected` 卸载操作
+#### 3.2 `disconnectedCallback` 卸载组件
+
+- `this.connectStateMap.set` 修改映射表将当前组件改为 `false`
+- 执行卸载 `handleDisconnected`
+
+`handleDisconnected` 执行卸载：
 
 - `appInstanceMap` 先拿到应用信息，确保应用存在、没有被卸载、不是隐藏
-- 如果是 `keep-alive` 仅下线应用，保活
+- 如果是 `keep-alive` 模式仅断开应用：`app.hiddenKeepAliveApp`
 - 否则卸载应用 `this.unmount(destroy, callback)`
 
 至此整个 `MicroAppElement` 基本说完，大致分了 3 个步骤：
 
-1. 挂载和卸载：`connectedCallback`、`disconnectedCallback`
-2. 监听属性变化：`attributeChangedCallback`
+1. 监听属性变化：`attributeChangedCallback`
+2. 挂载和卸载：`connectedCallback`、`disconnectedCallback`
 3. 首次执行加载和执行卸载：`handleConnected`、`handleDisconnected`
 
 ---- 分割线 ----
