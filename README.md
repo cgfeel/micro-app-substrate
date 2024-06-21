@@ -271,6 +271,16 @@
 - 如果以上都不是且状态不是 `isWaiting`，创建一个微任务 `handleAttributeUpdate`
 - 否则不做任何操作
 
+> 这里是有一个问题的，以初始化一个组件作为场景：
+>
+> - 初始化组件观察属性修改 `attributeChangedCallback`
+> - 假定提供了 `name` 和 `url` 这两个属性
+> - 这里会拿 `connectedCount` 去判断当前应用是否挂载，由于当前应用还没有挂载，所以 `connectedCount` 是上一个组件的编号
+> - 不要紧的是同时还拿了 `this.name` 和 `this.url` 去判断，初始化时这两个值还是空值
+> - 然后粗发 `handleInitialNameAndUrl`，这里会再次拿上次组件的 `connectedCount` 去执行一遍 `handleConnected`
+> - 好在 `handleConnected` 要求 `name` 和 `url` 这两个属性都存在有效值
+> - 但会引起重复创建的逻辑问题，所以开发人员也在 144 行备注：`TODO: 这里的逻辑可否再优化一下`
+
 `handleAttributeUpdate` 更新已赋值且挂载的应用：
 
 - 进入微任务前想设置 `this.isWaiting = true`，避免重复操作
