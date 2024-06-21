@@ -367,15 +367,15 @@
 >
 > 在当前版本中 `ssrUrl` 优先级高于 `url`，但是在 `keep-alive` 下比对连接，不用考虑 `ssrUrl`
 
-`handleCreateApp` 创建实例，先根据应用名获取实例，3 个情况：
+先说创建，`handleCreateApp` 创建实例，先根据应用名获取实例，3 个情况：
 
 - 实例存在且是预加载 `isPrerender`，当前对象中直接注销应用：`unmount`，之后再创建应用 `createAppInstance`
 - 实例存在不是预加载，彻底销毁应用 `actionsForCompletelyDestroy`，之后再创建应用 `createAppInstance`
 - 实例不存在，直接创建应用 `createAppInstance`
 
-在 `CreateApp` 中会重新设置实例 `appInstanceMap`
+> 在 `CreateApp` 构造中会重新设置实例 `appInstanceMap`，作为所有应用实例的映射表
 
-修改实例前会先拿到应用信息，和当前的信息进行比对：
+再说更新，修改实例前会先拿到应用信息，和当前的信息进行比对：
 
 - 如果应用已隐藏，且修改的应用 `url` 一样，重新连接应用：`handleShowKeepAliveApp`
 - 如果 `url` 都一样，当前应用已卸载，或是预加载应用且核心一致，注 ⑩，直接挂载：`this.handleMount(oldApp)`
@@ -384,7 +384,7 @@
 
 > 注 10：核心信息包括：`scopecss`、`useSandbox`、`iframe`
 
-再次带入场景，修改一个已挂载的应用 `attributeChangedCallback`，会有两种情况：
+带入场景，修改一个已挂载的应用 `attributeChangedCallback`，会有两种情况：
 
 1. 修改的是 `url` 或 `name`，并且这个使用应用没有挂载，注 ⑩
 2. 还是修改同样的属性，但应用肯定是挂载了或预加载了
