@@ -262,7 +262,7 @@
 - `dispatchLifecyclesEvent` 创建并执行 `create` 事件，注 ⑧
 - 如果提供了应用名和连接，执行首次挂载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
 
-> 注 ⑧：使用当前元素、应用名、`created` 来创建事件
+> 注 ⑧：使用当前元素、应用名、来创建 `created` 事件
 >
 > - 先定位到元素的根元素上：`getRootContainer`
 > - 删除作用域中其他应用
@@ -273,7 +273,7 @@
 #### 1.2 `disconnectedCallback` 卸载组件：
 
 - 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
-- 执行卸载操作 `handleDisconnected`
+- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-handledisconnected-卸载操作)]
 
 #### 2.1 `attributeChangedCallback` 观察属性修改：
 
