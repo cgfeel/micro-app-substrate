@@ -384,18 +384,18 @@
 
 > 注 10：核心信息包括：`scopecss` 样式隔离、`useSandbox` 使用沙箱、`iframe` 使用 `iframe` 沙箱，全部是 `boolean` 类型
 
-带入场景，修改一个已挂载的应用 `attributeChangedCallback`，会有两种情况：
+带入场景，修改已挂载的组件 `<micro-app />`， `attributeChangedCallback` 会有两种情况：
 
-1. 修改的是 `url` 或 `name`，并且这个使用应用没有挂载，注 ⑩
-2. 还是修改同样的属性，但应用肯定是挂载了或预加载了
+1. 修改的是 `url` 或 `name`，这个组件在此之前因为缺失属性没有挂载应用，注 ⑩
+2. 修改组件属性，组件已挂载或已完成预加载
 
-> 注 ⑩：因为判断条件是，要么修改的属性值为 `false`，要么应用没加载 `connectStateMap`，这两个任意条件满足都不会挂载
+> 注 ⑩：挂载组件并创建应用的前提是 `url` 和 `name` 这两个值都有效，缺少一个只能挂载组件不会创建应用
 
 得出下面结论：
 
-- 没挂载的情况执行 `handleConnected`
-- 挂载了执行 `handleAttributeUpdate`，不会执行 `handleConnected` 流程上面描述了
-- 这样无论是应用新增，还是非挂载应用挂载、还是重新加载，都保证能够顺利通过 `handleConnected`
+- 没挂载的情况执行 `handleInitialNameAndUrl`
+- 挂载了执行 `handleAttributeUpdate`
+- 这样无论是新增，还是修改组件属性、还是重载，都能保证通过 `handleConnected` 创建或挂载应用
 
 #### 3.2 `handleDisconnected` 卸载操作
 
