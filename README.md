@@ -290,13 +290,16 @@
 
 `handleAttributeUpdate` 更新已赋值且挂载的应用：
 
-- 进入微任务先取消 `isWaiting` 状态
-- 查看当前元素上 `url` 和 `name` 都是有效值：`this.getAttribute`
-- 通过 `appInstanceMap` 将应用取出来
-- 如果修改的是 `name`，应用没有卸载、没有隐藏、不是预加载，更新之后返回一个错误警告
-- 否则进行修改应用信息
+- 进入为任务前想设置 `this.isWaiting = true`，避免重复操作
+- 进入微任务后取消 `isWaiting` 状态
+- 查看当前元素上 `url` 和 `name` 都是有效值：`formatAppName(this.getAttribute("name"|"url"))`
+- 通过 `appInstanceMap` 将应用取出来在决定如何修改
 
-修改应用信息：
+修改的是 `name`，且此前已创建了应用实例：
+
+- 应用实例没有卸载、没有隐藏、不是预加载，直接更新 `name` 后返回一个错误警告
+
+否则修改的 `name` 或 `url` 不同，开始修改应用信息：
 
 - 如果修改 `url`，卸载应用后再启动：`unmount` - `actionsForAttributeChange`
 - 否则看是否在线应用，断开连接后再启动：`actionsForAttributeChange` - `actionsForAttributeChange`
