@@ -499,20 +499,22 @@
 - `start` 时预加载：`preFetchAction` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L104)]
 - 自定义组件 `MicroAppElement` 挂载应用：`handleCreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L350)]
 
-带入场景来看吧，预加载应用后加载应用：
+带入场景来看吧，预加载应用：
 
-- `start` 时 `preFetch` 发起预加载微任务，详细流程见 `microApp.start` 总结
-- 流程：`preFetchInSerial` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
+- `start` 时 `preFetch` 发起预加载微任务，详细见 `microApp.start` 总结 [[查看](#microappstart-启动应用)]
+- 流程：`preFetch` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
+- 在 `promiseRequestIdle` 中会先声明应用实例 `new CreateApp()`
+- 在 `CreateApp` 构造函数中加载资源 `loadSourceCode`，创建沙箱 `createSandbox`
 
 再加载应用，先从属性修改开始：
 
-- 详细流程见 `defineElement` 总结
-- 流程：`attributeChangedCallback` - `connectedCallback` - `handleConnected`
-- 拿到预加载的应用，`url` 没变，核心配置没变，又是预加载：`isPrefetch`
+- 详细流程见 `defineElement` 总结 [[查看](#defineelement-自定义组件-microappelement)]
+- 流程：`attributeChangedCallback` - `handleConnected` - `connectedCallback` - `handleConnected`
+- 从 `handleConnected` 开始，拿到预加载的应用，`url` 没变，核心配置没变，又是预加载：`isPrefetch`
 - 直接发起挂载应用：`this.handleMount(oldApp)`
-- 设置应用状态 `appStates.BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
-- 通过 `CreateApp` 的 `mount` 挂载应用
-- 从而略过再次加载资源、启动沙箱
+- 设置应用状态 `BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
+- 通过 `CreateApp` 的 `mount` 挂载应用，详细见挂载流程 [[查看](#31-mount-挂载应用)]
+- 从而略过 `CreateApp` 构造函数，避免再次加载资源、启动沙箱
 
 > 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的。
 
