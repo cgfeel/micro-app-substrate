@@ -523,7 +523,7 @@
 
 目录：`index.ts` - `extractSourceDom` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/index.ts#L82)]
 
-- 先通过 `(new DOMParser()).parseFromString` 解析加载的 `html` 资源，注 ⑫
+- 先通过 `app.parseHtmlString` 解析加载的 `html` 资源，注 ⑫
 - 查找 `micro-app-head` 和 `micro-app-body`，如果都不存在报错返回
 - 创建一个 `fiberStyleTasks` 用于收集加载的样式队列，注 ⑬
 - 使用 `flatChildren` 递归处理每一个子集元素，注 ⑭
@@ -534,7 +534,10 @@
 
 在 `app.onLoad` 中只判断资源是否加载完毕，加载完毕执行 `mount`
 
-> 注 ⑫：优先使用沙箱 `this.sandBox.proxyWindow.DOMParser`
+> 注 ⑫：
+>
+> - 优先使用沙箱解析 `this.sandBox.proxyWindow.DOMParser`，否则从当前 `window` 对象解析
+> - 将 `html` 字符解析成 `dom` 返回 `body`：`(new DOMParser()).parseFromString().body`
 >
 > 注 ⑬：`fiberStyleTasks` 添加要求要么预加载 `isPrefetch`、要么 `fiber`
 >
