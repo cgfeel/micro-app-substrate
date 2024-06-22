@@ -550,7 +550,7 @@
 >
 > 注 ⑭：`flatChildren`
 >
-> - 通过获取的 `Dom` 对象 `wrapElement`，`app` 对象，`microAppHead` 头部 `Dom`，记录样式集合 `fiberStyleTasks`
+> - 参数：`Dom` 对象 `wrapElement`，`app` 对象，`microAppHead` 头部 `Dom`，记录样式集合 `fiberStyleTasks`
 > - 想获取每次递归资源的子集转换成数组：`Array.from(parent.children)`
 > - 遍历 `children` 迭代递归 `flatChildren`
 > - 拆分每一个 `children` 的 `dom`，分 4 类处理：`link`、`style`、`script`、`image`
