@@ -490,7 +490,7 @@
 > - 如果 `pllugin` 是一个对象，且包含了 `processHtml` 方法
 > - 将获取的资源传入进去处理
 
-在加载微应用中只有 1 处用到了 `HTMLLoader` 加载资源
+加载微应用中只有 1 处用到了 `HTMLLoader`
 
 - `CreateApp` - `loadSourceCode`
 
