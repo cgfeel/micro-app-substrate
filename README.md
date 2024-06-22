@@ -564,8 +564,7 @@
 > 处理 `link`：
 >
 > - 如果元素包含 `exclude` 属性，或者使用 `plugin` 的 `excludeChecker` 排除，注释掉
-> - 如果元素没有包含 `ignore` 属性，或者没有使用 `plugin` 的 `ignoreChecker` 排除
-> - 这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释
+> - 如果元素没有包含 `ignore` 属性，或者没有使用 `plugin` 的 `ignoreChecker` 排除执行 `extractLinkFromHtml`
 > - 否则就修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
 >
 > 关于 `extractLinkFromHtml`：
