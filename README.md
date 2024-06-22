@@ -565,9 +565,19 @@
 >
 > - 如果元素包含 `exclude` 属性，或者使用 `plugin` 的 `excludeChecker` 排除，注释掉
 > - 如果元素没有包含 `ignore` 属性，或者没有使用 `plugin` 的 `ignoreChecker` 排除
-> - 这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释，不包含责跳过下面操作
-> - 并汇总信息到 `linkInfo`，同时将连接添加到 `app.source.links.add()` 用于后续队列加载
+> - 这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释
 > - 否则就修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
+>
+> 关于 `extractLinkFromHtml`：
+>
+> - 只有两处使用，一个是 `flatChildren`，另外一个 `source.patch.handleNewNode` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/patch.ts#L88)]
+> - 这里只看 `flatChildren` 调用的 `extractLinkFromHtml`，这里没有提供参数 `isDynamic`
+> - 最终如果 `replaceComment`存在的话，它要做的事是将注释 `Dom` 替换 `link` 元素：`parent?.replaceChild(replaceComment, link)`，否则什么都不会做
+>
+> `extractLinkFromHtml` 除此之外还做了：
+>
+> - `rel === 'stylesheet'` 时更新 `sourceCenter.link`，注 ⑥
+> - `isDynamic` 不成立的情况下添加资源：`app.source.links.add(href)`，便于后续 `fetchLinksFromHtml` 添加样式作用域
 >
 > 处理 `style`:
 >
