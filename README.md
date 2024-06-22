@@ -613,7 +613,7 @@
 > 额外说下 `fiberStyleTasks`，用途是将修改 `css` 作用域的方法，封装在一个微任务队列中：
 >
 > - 先通过 `injectFiberTask` 将队列 `fiberStyleTasks` 传过去
-> - 一同传过去的还有修改 `css` 作用域的方法 `scopedCSS`
+> - 修改 `css` 作用域的方法 `scopedCSS` 作为 `callback`
 > - 返回的类型是 `() => promise<void>`，方便在后面迭代队列依次执行
 >
 > 执行 `injectFiberTask` 流程如下：
@@ -622,6 +622,7 @@
 > - `promise` 中通过 `requestIdleCallback` 将 `resolve` 传给 `callback` 并执行
 > - `callback` 中先修改 `css` 的作用域 `scopedCSS`
 > - 然后通过 `resolve(void)` 返回最初函数中的 `promise`，以便后续队列执行
+> - 如果传过来的 `injectFiberTask` 是无效值，直接执行 `callback` 不添加队列
 >
 > 注 ⑮：`fetchLinksFromHtml`
 >
