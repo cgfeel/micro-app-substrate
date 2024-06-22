@@ -626,7 +626,7 @@
 >
 > 注 ⑮：`fetchLinksFromHtml`
 >
-> 目录：`links.ts` - `fetchLinksFromHtml` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L124C17-L124C35)]
+> 目录：`links.ts` - `fetchLinksFromHtml` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L124)]
 >
 > - 转换资源 `app.source.links` 为数组进行队列
 > - 通过 `fetchLinkPromise` 将队列依次加载，如果资源没有内容 `linkInfo.code`，使用 `fetchSource` 加载资源，见注 ⑥
@@ -648,10 +648,36 @@
 > 流程：
 >
 > - 获取链接信息：从 `sourceCenter` 中获取 `linkInfo` 对象，并将源代码赋值给 `linkInfo.code`
-> - 获取应用的 `appSpaceData` 和 `placeholder`
-> - 如果 `placeholder` 存在，创建一个新的 `style` 元素 `convertStyle`
-> - `handleConvertStyle` 转换样式
+> - 获取应用的 `appSpaceData` 资源信息和 `placeholder` 占位符，一个类型为注释的 `Dom` 元素
+> - 如果 `placeholder` 不存在，什么都不做
+> - 如果存在则创建一个新的 `style` 元素 `convertStyle`，通过 `handleConvertStyle` 转换样式
 > - 如果 `placeholder` 存在父节点，则用新的 `style` 标签替换 `placeholder`。否则，将 `style` 标签添加到 `microAppHead`。
+>
+> 再补充 `fetchScriptsFromHtml`，加载 `script`：
+>
+> 目录：`scripts.ts` - `fetchScriptsFromHtml` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L305)]
+>
+> - 转换资源 `app.source.scripts` 为数组进行队列
+> - 用 `fetchScriptPromise` 将队列依次加载，如果资源没有内容 `scriptInfo.code`，使用 `fetchSource` 加载资源，见注 ⑥
+> - 用 `fetchScriptPromiseInfo` 按照应用记录地址和对应的资源信息 `sourceCenter.script.getInfo`，见注 ⑥
+> - 根据 `isPrefetch` 或 `fiber` 决定是队列，还是立即执行，见注 ⑬
+> - 执行 `promiseStream` 队列，这里假定都是成功的
+> - 通过 `injectFiberTask` 将 `fetchScriptSuccess` 放入空闲时间执行
+> - `fiberScriptTasks` 为 `null` 立即触发 `app.onLoad`
+> - 否则将 `app.onLoad` 添加到 `fiberLinkTasks` 队列最后，通过 `serialExecFiberTasks` 依次执行
+>
+> 说说 `fetchScriptSuccess`：
+>
+> 目录：`links.ts` - `fetchScriptSuccess` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L352)]
+>
+> 流程：
+>
+> - 将加载的资源赋值给 `scriptInfo.code`
+> - 如果应用是预加载 `isPrefetch`，并且加载等级又是 2：加载并解析，会更新资源信息
+> - 将当前脚本信息的对象 `scriptInfo.appSpace[app.name]` 引用给 `appSpaceData`
+> - 如果 `appSpaceData.parsedCode` 是空值，通过 `bindScope` 将脚本作为一个完整的模块字符，见注 ⑯
+> - `getSandboxType` 更新沙箱类型
+> - 通过 `getParsedFunction` 将 应用 `app`，`script` 集合 `scriptInfo`、绑定的模块 `parsedCode` 字符，转换成科执行的模块方法，见注 ⑱
 
 #### 2.1. `createSandbox` 创建沙箱
 
