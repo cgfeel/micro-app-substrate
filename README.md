@@ -490,10 +490,14 @@
 > - 如果 `pllugin` 是一个对象，且包含了 `processHtml` 方法
 > - 将获取的资源传入进去处理
 
-在启动应用中会有 2 处用到 `HTMLLoader`：
+在加载微应用中只有 1 处用到了 `HTMLLoader` 加载资源
 
-- 启动时预加载
-- 创建应用加载资源
+- `CreateApp` - `loadSourceCode`
+
+而使用 `CreateApp` 创建应用只有 2 处：
+
+- `start` 时预加载：`preFetchAction` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L104)]
+- 自定义组件 `MicroAppElement` 挂载应用：`handleCreateApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L350)]
 
 带入场景来看吧，预加载应用后加载应用：
 
