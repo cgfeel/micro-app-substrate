@@ -577,11 +577,14 @@
 >
 > - `rel === 'stylesheet'` 时更新 `sourceCenter.link`，见注 ⑥：`createSourceCenter`
 > - `isDynamic` 不成立的情况下添加资源：`app.source.links.add(href)`，便于后续 `fetchLinksFromHtml` 添加样式作用域
+> - 需要注意的是 `app.source.links.add` 只能通过 `extractLinkFromHtml` 添加
 >
 > 处理 `style`:
 >
-> - 如果默认的样式隔离，且没有 `ignore` 属性，通过 `injectFiberTask` 队列调用 `scopedCSS` 将修改作用域的样式添加到 `fiberStyleTasks`
-> - 如果元素包含 `exclude` 替换成注释，其他情况不做考虑
+> - 如果元素包含 `exclude` 注释掉 `style`
+> - 如果是默认的样式隔离，且没有 `ignore` 属性，通过 `injectFiberTask` 队列调用 `scopedCSS` 将修改作用域的样式添加到 `fiberStyleTasks`
+> - 如果没有提供 `fiberStyleTasks` 则立即通过 `scopedCSS` 更换 `style` 的样式作用域
+> - 其他情况的 `style` 均不处理
 >
 > 处理 `script`：可以按照下面思路来解读
 >
