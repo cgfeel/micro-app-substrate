@@ -575,7 +575,7 @@
 >
 > `extractLinkFromHtml` 除此之外还做了：
 >
-> - `rel === 'stylesheet'` 时更新 `sourceCenter.link`，注 ⑥
+> - `rel === 'stylesheet'` 时更新 `sourceCenter.link`，见注 ⑥：`createSourceCenter`
 > - `isDynamic` 不成立的情况下添加资源：`app.source.links.add(href)`，便于后续 `fetchLinksFromHtml` 添加样式作用域
 >
 > 处理 `style`:
