@@ -677,7 +677,7 @@
 > - 将当前脚本信息的对象 `scriptInfo.appSpace[app.name]` 引用给 `appSpaceData`
 > - 如果 `appSpaceData.parsedCode` 是空值，通过 `bindScope` 将脚本作为一个完整的模块字符，见注 ⑯
 > - `getSandboxType` 更新沙箱类型
-> - 通过 `getParsedFunction` 将 应用 `app`，`script` 集合 `scriptInfo`、绑定的模块 `parsedCode` 字符，转换成科执行的模块方法，见注 ⑱
+> - 通过 `getParsedFunction` 将应用 `app`，`script` 集合 `scriptInfo`、绑定的模块 `parsedCode` 字符，转换成可执行的模块方法，见注 ⑱
 
 #### 2.1. `createSandbox` 创建沙箱
 
