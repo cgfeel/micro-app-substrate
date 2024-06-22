@@ -485,7 +485,7 @@
 
 > 注 ⑪：
 >
-> - `processHtml` 会提取所有全局的 `plugin`，和当前指定的 `plugin`
+> - `processHtml` 会提取所有全局的 `plugin`，和当前应用指定的 `plugin`
 > - 然后通过 `reduce` 遍历 `plugin` 集合
 > - 如果 `pllugin` 是一个对象，且包含了 `processHtml` 方法
 > - 将获取的资源传入进去处理
