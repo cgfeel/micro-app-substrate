@@ -594,14 +594,17 @@
 > - 最终如它要做的事是将注释 `Dom` 替换 `script` 元素：`parent?.replaceChild(replaceComment!, script)`
 > - 只看 `replaceComment` 有 5 条，无论哪种结果都是用注释代替 `script`
 >
-> `extractScriptElement` 除此之外还做了：
+> 如果 `script` 带有 `src` 或是内联脚本，除此之外还做了：
 >
-> - 如果带有 `src` 的 `script` 将获取的信息最终汇总到 `sourceCenter.script`，见注 ⑥：`createSourceCenter`：
-> - 如果带有 `src` 的 `script` 将链接添加到 `app.source.scripts`，以便后续 `fetchScriptsFromHtml` 处理
-> - 如果是内联的 `script` 根据脚本内容更新 `sourceCenter.script`，见注 ⑥：`createSourceCenter`：
-> - 如果是内联的 `script` 将链接添加到 `app.source.scripts`，以便后续 `fetchScriptsFromHtml` 处理
+> - 将获取的信息最终汇总到 `sourceCenter.script`，见注 ⑥：`createSourceCenter`：
+> - 将链接添加到 `app.source.scripts`，以便后续 `fetchScriptsFromHtml` 处理
 > - `app.source.scripts` 添加的 `item` 和 `sourceCenter.script` 映射的 `key` 一致
 > - 需要注意的是 `app.source.scripts.add` 只能通过 `extractScriptElement` 添加
+>
+> `extractScriptElement` 例外情况：
+>
+> - 当 `script` 不是规定范围脚本，或有属性 `ignore`，或被 `plguin` 通过 `ignoreChecker` 排除
+> - 将删除 `globalEnv.rawDocument.currentScript` 返回 `nulll` 什么都不做
 >
 > 处理 `image`：
 >
