@@ -265,7 +265,7 @@
 如果当前修改的是 `url` 或 `name`，且值为空或者当前元素已卸载：
 
 - 如果是 `url`，格式化 `formatAppURL` 并更新值
-- 如果是 `name`，在格式化并更新值之前，要先更新：应用信息、元素信息、属性
+- 如果是 `name`，格式化 `formatAppName` 后同时更新：应用信息、元素信息、属性
 - 无论是更新 `url` 还是 `name`，执行完就会再次执行一遍挂载操作 `handleInitialNameAndUrl`
 - `handleInitialNameAndUrl` 中会根据应用启动状态，执行首次加载 `handleConnected`，见 3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
 - 如果以上都不是且状态不是 `isWaiting`，创建一个微任务 `handleAttributeUpdate`
@@ -516,8 +516,6 @@
 - 设置应用状态 `BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
 - 通过 `CreateApp` 的 `mount` 挂载应用，详细见挂载流程 [[查看](#31-mount-挂载应用)]
 - 从而略过 `CreateApp` 构造函数，避免再次加载资源、启动沙箱
-
-> 这里还有个逻辑问题，当子模块名不规范的时候，`preFetch` 又优先于模块名称转换，这个时候加载的资源是匹配不到模块的。
 
 #### 1.3. `extractSourceDom` 成功加载资源回调：
 
