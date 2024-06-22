@@ -353,7 +353,7 @@
 
 > 注 ⑨：更新 `url`
 >
-> - `getDisposeResult` 检查是否开启 `ssr`，没有责将 `ssrUrl` 设为空，否则往下看
+> - `getDisposeResult` 检查是否开启 `ssr`，没有则将 `ssrUrl` 设为空，否则往下看
 > - 判断是否开启虚拟路由系统：`disable-memory-router`
 > - 如果是虚拟路由，`CompletionPath` 将真实路由的 `pathname` + `search` 和 应用连接，组合成为 `ssrUrl`
 > - 否则将从现有的浏览器连接中获取路由
