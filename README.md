@@ -460,7 +460,9 @@
 
 目录：`html.ts` - `HTMLLoader` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/loader/html.ts#L10)]
 
-- `getInstance` 返回单例
+暴露两个方法：
+
+- `getInstance` 静态方法，返回单例
 - `run`：执行加载和格式化的逻辑
 
 加载的本质还是 `fetch`：
