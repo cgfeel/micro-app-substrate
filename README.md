@@ -506,10 +506,11 @@
 - 在 `promiseRequestIdle` 中会声明应用实例 `new CreateApp()`
 - 在 `CreateApp` 构造函数中加载资源 `loadSourceCode`，创建沙箱 `createSandbox`
 
-再加载应用，从属性修改开始：
+再首次加载应用，从属性修改开始：
 
 - 详细流程见 `defineElement` 总结 [[查看](#defineelement-自定义组件-microappelement)]
 - 流程：`attributeChangedCallback` - `handleConnected` - `connectedCallback` - `handleConnected`
+- 首次加载应用，`this.appUrl`、`this.appName` 自然是空值，这里假定 `url` 和 `name` 都提供的情况下
 - 从 `handleConnected` 开始，拿到预加载的应用，`url` 没变，核心配置没变，又是预加载：`isPrefetch`
 - 直接发起挂载应用：`this.handleMount(oldApp)`
 - 设置应用状态 `BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
