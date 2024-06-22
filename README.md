@@ -668,7 +668,7 @@
 >
 > 说说 `fetchScriptSuccess`：
 >
-> 目录：`links.ts` - `fetchScriptSuccess` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/links.ts#L352)]
+> 目录：`links.ts` - `fetchScriptSuccess` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L352)]
 >
 > 流程：
 >
