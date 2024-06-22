@@ -633,7 +633,7 @@
 > - 根据 `fiberStyleResult` 决定是队列，还是立即执行，见注 ⑬
 > - 执行 `promiseStream` 队列，这里假定都是成功的
 > - 通过 `injectFiberTask` 将 `fetchLinkSuccess` 放入空闲时间执行
-> - 立即执行没有 `fiberStyleResult` 直接触发 `app.onLoad`
+> - 没有 `fiberStyleResult` 立即触发 `app.onLoad`
 > - 否则将 `app.onLoad` 添加到 `fiberLinkTasks` 队列最后，通过 `serialExecFiberTasks` 依次执行
 >
 > 说说 `fetchLinkSuccess`：
