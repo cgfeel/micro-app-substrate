@@ -487,7 +487,7 @@
 >
 > - `processHtml` 会提取所有全局的 `plugin`，和当前应用指定的 `plugin`
 > - 然后通过 `reduce` 遍历 `plugin` 集合
-> - 如果 `pllugin` 是一个对象，且包含了 `processHtml` 方法
+> - 如果 `plugin` 是一个对象，且包含了 `processHtml` 方法
 > - 将获取的资源传入进去处理
 
 加载微应用中只有 1 处用到了 `HTMLLoader`
@@ -546,6 +546,7 @@
 > - 这样如果应用不是预加载将不会使用队列 `fiberStyleTasks` 来收集 `inner style`
 > - 而是立即执行每一个 `scopedCSS`
 > - 这种情况 `serialExecFiberTasks` 返回的 `fiberStyleResult` 也是 `null`
+> - 导致的结果是所有的方法都是立即执行，不会队列，也不会通过 `injectFiberTask` 利用浏览器空闲加载
 >
 > 注 ⑭：`flatChildren`
 >
@@ -562,8 +563,8 @@
 >
 > 处理 `link`：
 >
-> - 如果元素包含 `exclude` 属性，或者使用 `pllugin` 的 `excludeChecker` 排除，注释掉
-> - 如果元素没有包含 `ignore` 属性，或者没有使用 `pllugin` 的 `ignoreChecker` 排除
+> - 如果元素包含 `exclude` 属性，或者使用 `plugin` 的 `excludeChecker` 排除，注释掉
+> - 如果元素没有包含 `ignore` 属性，或者没有使用 `plugin` 的 `ignoreChecker` 排除
 > - 这种情况的 `link` 包含 `stylesheet` 属性，通过 `extractLinkFromHtml` 替换成注释，不包含责跳过下面操作
 > - 并汇总信息到 `linkInfo`，同时将连接添加到 `app.source.links.add()` 用于后续队列加载
 > - 否则就修正元素的 `href` 属性为子应用对应的链接 `CompletionPath`
