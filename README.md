@@ -503,10 +503,10 @@
 
 - `start` 时 `preFetch` 发起预加载微任务，详细见 `microApp.start` 总结 [[查看](#microappstart-启动应用)]
 - 流程：`preFetch` - `preFetchInSerial` - `preFetchAction` - `promiseRequestIdle`
-- 在 `promiseRequestIdle` 中会先声明应用实例 `new CreateApp()`
+- 在 `promiseRequestIdle` 中会声明应用实例 `new CreateApp()`
 - 在 `CreateApp` 构造函数中加载资源 `loadSourceCode`，创建沙箱 `createSandbox`
 
-再加载应用，先从属性修改开始：
+再加载应用，从属性修改开始：
 
 - 详细流程见 `defineElement` 总结 [[查看](#defineelement-自定义组件-microappelement)]
 - 流程：`attributeChangedCallback` - `handleConnected` - `connectedCallback` - `handleConnected`
