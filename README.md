@@ -278,8 +278,7 @@
 > - 这里会拿 `connectedCount` 去判断当前应用是否挂载，由于当前应用还没有挂载，所以 `connectedCount` 是上一个组件的编号
 > - 因为同时还拿了 `this.name` 和 `this.url` 去判断，初始化时这两个值还是空值
 > - 然后触发 `handleInitialNameAndUrl`，这里会再次拿上次组件的 `connectedCount` 去执行一遍 `handleConnected`
-> - 好在 `handleConnected` 要求 `name` 和 `url` 这两个属性都存在有效值
-> - 但会引起重复创建的逻辑问题，开发人员也在 144 行备注：`TODO: 这里的逻辑可否再优化一下`
+> - 会引起重复创建的逻辑问题，开发人员也在 144 行备注：`TODO: 这里的逻辑可否再优化一下`
 
 `handleAttributeUpdate` 更新已赋值且挂载的应用：
 
