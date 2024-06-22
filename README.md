@@ -465,7 +465,7 @@
 - `getInstance` 静态方法，返回单例
 - `run`：执行加载和格式化的逻辑
 
-加载的本质还是 `fetch`：
+加载的本质还是 `fetch`，`run` 方法：
 
 - 拿到应用 `name` 和 `url`
 - `isTargetExtension` 判断加载的资源是不是 `js`
