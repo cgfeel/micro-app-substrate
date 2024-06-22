@@ -577,6 +577,7 @@
 >
 > - `rel === 'stylesheet'` 时更新 `sourceCenter.link`，见注 ⑥：`createSourceCenter`
 > - `isDynamic` 不成立的情况下添加资源：`app.source.links.add(href)`，便于后续 `fetchLinksFromHtml` 添加样式作用域
+> - `app.source.links` 添加的 `item` 和 `sourceCenter.link` 映射的 `key` 一致
 > - 需要注意的是 `app.source.links.add` 只能通过 `extractLinkFromHtml` 添加
 >
 > 处理 `style`:
@@ -586,13 +587,21 @@
 > - 如果没有提供 `fiberStyleTasks` 则立即通过 `scopedCSS` 更换 `style` 的样式作用域
 > - 其他情况的 `style` 均不处理
 >
-> 处理 `script`：`extractScriptElement` 可以按照下面思路来解读
+> 处理 `script`：`extractScriptElement`
 >
+> - 只有两处使用，一个是 `flatChildren`，另外一个 `source.patch.handleNewNode` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/patch.ts#L114)]
+> - 这里只看 `flatChildren` 调用的 `extractScriptElement`，这里没有提供参数 `isDynamic`
+> - 最终如它要做的事是将注释 `Dom` 替换 `script` 元素：`parent?.replaceChild(replaceComment!, script)`
 > - 只看 `replaceComment` 有 5 条，无论哪种结果都是用注释代替 `script`
-> - 对于带有链接的 `script` 会 `remote`，将获取的信息最终汇总到 `sourceCenter`
-> - 同时将连接添加到 `app.source.scripts.add()` 用于后续队列加载
-> - 对于 `inner script` 将信息直接汇总到 `sourceCenter`
-> - 同时添加一个随机字符到 `app.source.scripts.add()`
+>
+> `extractScriptElement` 除此之外还做了：
+>
+> - 如果带有 `src` 的 `script` 将获取的信息最终汇总到 `sourceCenter.script`，见注 ⑥：`createSourceCenter`：
+> - 如果带有 `src` 的 `script` 将链接添加到 `app.source.scripts`，以便后续 `fetchScriptsFromHtml` 处理
+> - 如果是内联的 `script` 根据脚本内容更新 `sourceCenter.script`，见注 ⑥：`createSourceCenter`：
+> - 如果是内联的 `script` 将链接添加到 `app.source.scripts`，以便后续 `fetchScriptsFromHtml` 处理
+> - `app.source.scripts` 添加的 `item` 和 `sourceCenter.script` 映射的 `key` 一致
+> - 需要注意的是 `app.source.scripts.add` 只能通过 `extractScriptElement` 添加
 >
 > 处理 `image`：
 >
