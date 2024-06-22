@@ -586,7 +586,7 @@
 > - 如果没有提供 `fiberStyleTasks` 则立即通过 `scopedCSS` 更换 `style` 的样式作用域
 > - 其他情况的 `style` 均不处理
 >
-> 处理 `script`：可以按照下面思路来解读
+> 处理 `script`：`extractScriptElement` 可以按照下面思路来解读
 >
 > - 只看 `replaceComment` 有 5 条，无论哪种结果都是用注释代替 `script`
 > - 对于带有链接的 `script` 会 `remote`，将获取的信息最终汇总到 `sourceCenter`
