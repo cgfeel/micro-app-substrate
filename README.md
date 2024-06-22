@@ -534,7 +534,7 @@
 
 在 `app.onLoad` 中只判断资源是否加载完毕，加载完毕执行 `mount`
 
-> 注 ⑫：
+> 注 ⑫：`parseHtmlString`
 >
 > - 优先使用沙箱解析 `this.sandBox.proxyWindow.DOMParser`，否则从当前 `window` 对象解析
 > - 将 `html` 字符解析成 `dom` 返回 `body`：`(new DOMParser()).parseFromString().body`
@@ -549,12 +549,16 @@
 >
 > 注 ⑭：`flatChildren`
 >
-> - 通过获取的资源 `wrapElement`，应用 `app`，头部 `microAppHead`，集合 `fiberStyleTasks`
+> - 通过获取的 `Dom` 对象 `wrapElement`，`app` 对象，`microAppHead` 头部 `Dom`，记录样式集合 `fiberStyleTasks`
 > - 想获取每次递归资源的子集转换成数组：`Array.from(parent.children)`
 > - 遍历 `children` 迭代递归 `flatChildren`
 > - 拆分每一个 `children` 的 `dom`，分 4 类处理：`link`、`style`、`script`、`image`
 >
-> 关于：
+> 这里有个问题：
+>
+> - `microAppHead` 传给 `flatChildren`，除了不断递归之外，实际没用
+> - 需要用到 `microAppHead` 是在 `fetchLinksFromHtml`，将其传给 `fetchLinkSuccess`
+> - 用于将 `link` 转换成 `stye` 元素后添加到 `micro-app-head`
 >
 > 处理 `link`：
 >
