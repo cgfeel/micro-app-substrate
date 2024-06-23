@@ -165,6 +165,8 @@
 > - 给 `window` 注入一个全局属性 `__MICRO_APP_BASE_APPLICATION__`
 > - 通过 `rejectMicroAppStyle` 创建一个 `style` 标签，将所有 `tagName` 和 `micro-app-body` 作为块级元素，隐藏 `micro-app-head`
 > - `micro-app` 会将子应用的 `head` 转换为 `micro-app-head`，将 `body` 转换为 `micro-app-body`，后面会提到
+>
+> 这样能将 `window` 最原始的方法做一个保留，不被污染
 
 定义配置文件：
 
