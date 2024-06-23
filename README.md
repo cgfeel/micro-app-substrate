@@ -126,7 +126,7 @@
 6. 开启沙箱 `IframeSandbox` 或 `WithSandBox`，通过 `proxy` 作为 `JS` 沙箱
 7. 资源处理完毕回调 `onLoad` 触发 `mount`
 8. `execScripts` 在沙箱中加载、执行脚本
-9. 从 `sandbox.proxyWindow` 中提取 `mount` 和 `unmount` 执行挂载（和 `qiankun` 一样）
+9. 从 `sandbox.proxyWindow` 中提取 `mount` 和 `unmount` 执行挂载（和 `qiankun` 一样，注 ⑲）
 10. 完成挂载触发 `afterMounted` 挂载完毕事件和通知
 
 `micro-app` 是基于 `web component`，在上面演示了 `web component` 特性。所以大致可以想到 `micro-app` 启动流程如下：
@@ -1078,6 +1078,16 @@ public url: string; // 应用 URL
 > - `getParsedFunction` 会优先通过 `getExistParseResult` 查找其他应用中是否有相同的执行脚本，将其放回
 > - 如果没有则通过 `code2Function` 使用 `new Function` 生成执行函数
 > - 生成的函，最终数通过 `getEffectWindow` 将应用的 `window` 作为上下文立即执行
+>
+> 注 ⑲：`mount`、`unmount`
+>
+> - 和 `qiankun` 一样 `micro-app` 支持在子应用的 `window` 对象上添加 `mount`、`unmount`
+> - 用于为子应用开启 `umd` 模式，详细见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/framework/vue?id=_1%e3%80%81%e5%bc%80%e5%90%afumd%e6%a8%a1%e5%bc%8f%ef%bc%8c%e4%bc%98%e5%8c%96%e5%86%85%e5%ad%98%e5%92%8c%e6%80%a7%e8%83%bd)]
+>
+> 引发的思考：
+>
+> - 不是 `umd` 模式怎么加载？详细见：3.1. `mount` 挂载应用 [[查看](#31-mount-挂载应用)] - 不是 `umdMode`
+> - `umd` 模式 `Vite` 怎么办？参考 `qiankun` 总结的常见问题 [[查看](https://github.com/cgfeel/micro-qiankun-substrate#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)]
 
 **补充 `handleMounted`：**
 
