@@ -353,11 +353,11 @@
 - 通过 `appInstanceMap` 将应用取出来，如果提取应用根据情况修改实例
 - 如果提取不出来创建实例 `handleCreateApp`
 
-> 关于 `shadowDom`
+> 关于 `shadowDom` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L194)]
 >
 > - 先看配置条件 `this.shadowRoot`，这个值是没有初始定义，也没有赋值的，所以可以把它看作 `false`，总会执行
 > - 再看启动 `start` 配置文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=start)] 已注释，但目前源码中还是在的
-> - 这样只要关心 `this.getDisposeResult('shadowDOM')`，假定浏览器支持的话
+> - 所以这样只要关心 `this.getDisposeResult('shadowDOM')`，假定浏览器支持的情况
 >
 > `getDisposeResult`：
 >
