@@ -1046,6 +1046,11 @@ public url: string; // 应用 URL
 - `callback`：回调函数
 - `replaceElement`：可选的 `HTMLScriptElement`，用于替换现有脚本元素。
 
+忽略的参数
+
+- `replaceElement`：`execScripts` 没传
+- `callback`：只有在延迟队列 `deferScriptPromise` 才会将 `initHook` 传过来
+
 流程：
 
 - `actionsBeforeRunScript`：为 `window` 对象注入 `__MICRO_APP_PROXY_WINDOW__` 为当前活跃沙箱的 `proxyWindow`
