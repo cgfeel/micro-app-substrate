@@ -568,7 +568,8 @@
 >
 > - 假定不预加载，在 `CreateApp` 找 `fiber` 有两处
 > - 第一处初始化 `false`，第二处 `mount` 更新
-> - 而 `mount` 更新受两处影响，第一处是 `onLoad` 中 `this.isPrefetch && this.isPrerender`
+> - 而 `mount` 更新受两处影响，见：3.1. `onLoad` 加载完毕 [[查看](#31-onload-加载完毕)]
+> - 第一处是 `onLoad` 中 `this.isPrefetch && this.isPrerender`
 > - 第二处是 `!this.isPrefetch` 时，根据 `web component` 属性是否设置了 `fiber` 来决定
 > - 这样就把范围大致缩小到 3 个：预加载、预渲染、`web component` 属性设置
 >
@@ -917,23 +918,23 @@ public url: string; // 应用 URL
 - 首先资源没有加载完 `++this.loadSourceLevel === 2` 是一定不会做任何操作
 - 将加载的 `html` 对象记录在 `source.html`，以便在 `mount` 的时候克隆到容器中
 - 应用已卸载的情况下返回不继续处理
-- 不是预加载的情况 `isPrefetch`，触发 `web component` 的 `mount` 方法，而 `web component` 会绕回来调用 `app.mount`
+- 不是预加载的情况 `isPrefetch`，触发 `web component` 的 `mount` 方法，而 `mount` 方法中会绕回来调用 `app.mount`
 - 是预加载又是预渲染 `isPrerender`，创建个 `div` 作为容器，设置沙箱 `setPreRenderState`，调用 `app.mount`
 - 其他情况不做处理，整个流程到此结束，例如：预加载，但不预渲染
 
-“不是预加载”和“预加载&预渲染”都会调用 `mount`，但有些许差别
+“不是预加载”和“预加载&预渲染”都会调用 `mount`，但有些许差别：
 
 - `routerMode`、`baseroute`、`defaultPage`：“预加载&预渲染”路由模式永远为空值
 - `disablePatchRequest`：“预加载&预渲染”路由模式永远为 `false`，而 “不是预加载” 由 `web component` 属性决定
-- `fiber`：“预加载&预渲染”路由模式永远为 `true`，查看，而“不是预加载” 由 `web component` 属性决定
+- `fiber`：“预加载&预渲染”路由模式永远为 `true`，查看注 ⑬ 了解，而“不是预加载” 由 `web component` 属性决定
 
 > `disablePatchRequest` 为 `false` 在 `iframe` 沙箱中会在头部创建一个 `base` 元素，用于指向指定的 `location.pathname`，默认的沙箱 `WithSandbox` 中会重写 `fetch`、`XMLHttpRequest`、`EventSource`
 
 `isPrefetch` 和 `isPrerender`：
 
-- `CreateApp` 中除了构造函数全部为 `false`，也就是说内部不会有更新为 `true` 的情况
+- `CreateApp` 中除了构造函数全部为 `false`，也就是说内部不会更新应用为预加载或预渲染
 - 而调用 `CreateApp` 有 2 处，见：1.2. `HTMLLoader` 加载资源 [[查看](#12-htmlloader-加载资源)] 中 `HTMLLoader` 部分
-- 先看自定义组件 `MicroAppElement`，`new CreateApp` 时没有 `isPrefetch` 和 `isPrerender`，可以排除
+- 自定义组件 `MicroAppElement`，`new CreateApp` 时没有 `isPrefetch` 和 `isPrerender`，可以排除
 - `start` 启动预加载时 `isPrefetch` 为 `true`，`prefetchLevel` 根据提供预加载的 `level` 来决定，`prefetchLevel` 为 3 的情况下开启预渲染 `isPrerender`
 
 结论：
