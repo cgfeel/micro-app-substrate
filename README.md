@@ -1080,7 +1080,7 @@ public url: string; // 应用 URL
 
 **带入场景，非 `umd` 模式如何加载：**
 
-假定子应用非 `umd` 模式，不暴露 `mount` 和 `mount`，流程如下：
+假定子应用非 `umd` 模式，不暴露 `mount` 和 `unmount`，流程如下：
 
 - 首次挂载应用 `umdMode` 为 `false`
 - 通过 `execScripts` 在沙箱中运行 `script`，提供 `initHook` 回调函数处理挂载
