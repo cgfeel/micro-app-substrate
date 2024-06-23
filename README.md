@@ -1082,8 +1082,8 @@ public url: string; // 应用 URL
 
 目录：`create_app.ts` - `handleMounted` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L371)]
 
-- 挂载应用最后无论是不是 `umd` 格式都会执行这个方法
-- 最终都要执行 `dispatchAction`，不同的是预加载只是将方法放入队列 `preRenderEvents`，不会立即执行
+- 挂载应用后只要拿到 `mount` 和 `unmount` 就会执行这个方法
+- 最终都要调用 `dispatchAction`，不同的是预加载只是将方法放入队列 `preRenderEvents`，不会立即执行
 - 除此之外预加载应用还会通过 `recordAndReleaseEffect` 去记录沙箱快照、并清理沙箱 `window effect`、`document effect` 等
 
 `dispatchAction`：
