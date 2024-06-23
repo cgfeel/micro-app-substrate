@@ -997,9 +997,21 @@ public url: string; // 应用 URL
 
 - 存在延迟队列，通过 `promiseStream` 将 `fetch` 的资源依次下载
 - 然后通过 `injectFiberTask` 将沙箱放入 `fiberScriptTasks` 中队列执行
-- 如果不存在延迟队列队列，但存在执行队列 `fiberScriptTasks`，将回调方法 `initHook` 添加到队列末尾
-- 通过 `serialExecFiberTasks` 拍平 `promise` 执行队列
+
+`deferScriptPromise` 延迟队列执行结束之后，或不存在延迟队列：
+
+- 存在执行队列 `fiberScriptTasks`，将回调方法 `initHook` 添加到队列末尾，通过 `serialExecFiberTasks` 拍平 `promise` 执行队列
 - 对于没有延迟队列，也没有执行队列的情况，就只能回调执行 `initHook`
+
+延迟队列完成执行和不存在延迟队列的区别，看参数：
+
+- 不存在 `deferScriptPromise` 回调时 `isFinished` 一定是 `true`
+- 存在 `deferScriptPromise` 回调时 `isFinished` 根据 `initHook` 的属性 `moduleCount`、`errorCount` 决定
+
+> 当 `moduleCount` 不是 `undefined`，并且资源没有全部加载失败 `isFinished` 为 `false`
+>
+> - `moduleCount` 要求 `script` 为 `module`，且不实用沙箱或使用 `iframe` 沙箱
+> - `errorCount` 资源失败时增加
 
 `fiberScriptTasks` 执行队列：
 
