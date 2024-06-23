@@ -539,7 +539,7 @@
 - 从 `handleConnected` 开始，拿到预加载的应用，`url` 没变，核心配置没变，又是预加载：`isPrefetch`
 - 直接发起挂载应用：`this.handleMount(oldApp)`
 - 设置应用状态 `BEFORE_MOUNT` 后，发起挂载 `this.mount(app))`
-- 通过 `CreateApp` 的 `mount` 挂载应用，详细见挂载流程 [[查看](#31-mount-挂载应用)]
+- 通过 `CreateApp` 的 `mount` 挂载应用，详细见挂载流程 [[查看](#32-mount-挂载应用)]
 - 从而略过 `CreateApp` 构造函数，避免再次加载资源、启动沙箱
 
 #### 1.3. `extractSourceDom` 成功加载资源回调：
