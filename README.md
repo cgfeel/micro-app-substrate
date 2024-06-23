@@ -947,14 +947,28 @@ public url: string; // 应用 URL
 - 更新 `HTML` 元素信息，并在沙箱内执行脚本 `execScripts`
 - 在所有脚本执行完毕后，如果是 `umdMode` 模式，处理应用挂载 `handleMounted`
 - 否则通过 `getUmdLibraryHooks` 提取 `mount` 和 `unmount`
-- 将 `unmount` 交给 `umdHookUnmount`，将 `mount` 交给 `umdHookMount` 以便卸载使用
+- 将 `unmount` 交给 `umdHookUnmount`，将 `mount` 交给 `umdHookMount` 以便后续使用
 - 标记沙箱模式 `markUmdMode` 后，将 `umdHookMount` 作为 `promise` 传给 `handleMounted` 挂载应用
 
 **`umdMode` 模式：**
 
 - 重建全局 `effect` 的快照：`this.sandBox?.rebuildEffectSnapshot`
 - 调用 `UMD` 模式下的挂载钩子函数：`handleMounted`
-- 处理挂载完成逻辑，如果出现错误，记录错误日志。
+- 处理挂载完成逻辑，如果出现错误，记录错误日志
+
+> `handleMounted` 会将 `umdHookMount` 作为 `promise` 传递过去：
+>
+> - `umdHookMount` 是一个私有方法，默认是 `null`
+> - 赋值更新只有一处，在非 `umdMode` 模式下 `execScripts` 提取 `mount` 赋值
+> - 再回到 `umdMode`，它是一个公开的属性，但是在外部并没有更新
+> - 内部也只有通过 `execScripts` 下设为 `true`
+>
+> 结论：
+>
+> - 应用首次加载的时候 `umdMode` 一定是 `false`
+> - 因此也一定会从子应用中去拿 `mount` 和 `unmount`，之后直接使用之前获取的 `hook` 触发 `handleMounted`
+> - 如果子应用不提供 `mount`，那么不提供 `promise` 去执行 `handleMounted`
+> - 在后续的 `mount` 中也不会再获取子应用的挂载方法，直接根据首次获取的结果执行 `handleMounted`
 
 **沙箱执行脚本补充：**
 
