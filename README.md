@@ -178,8 +178,6 @@
 - 修正子应用插件的 `key`，注 ⑦
 - 定义配置之后开始创建自定义组件：`defineElement(this.tagName)`
 
-> 配置文件中 `shadowDOM` 已取消不再支持关闭，`web component` 统一采用 `open` 模式开启 `shadowDOM` [[查看](#31-handleconnected-首次加载)]
->
 > 注 ⑤：关于预加载通过文档了解 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/prefetch)]
 >
 > 目录：`prefetch.ts` - `preFetch` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/prefetch.ts#L62)]
