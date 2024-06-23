@@ -348,11 +348,32 @@
 `handleConnected` 执行流程：
 
 - 应用名和连接都存在才会执行
-- 检查是否开启 `shadowDom`，在环境允许的情况下开启，模式为 `open`，允许外部访问
+- 检查是否开启 `shadowDom`，在环境允许的情况下开启，模式为 `open`，默认是不开启的
 - 在 `ssr` 环境下更新应用连接，注 ⑨
 - 通过 `appInstanceMap` 将应用取出来，如果提取应用根据情况修改实例
 - 如果提取不出来创建实例 `handleCreateApp`
 
+> 关于 `shadowDom`
+>
+> - 先看配置条件 `this.shadowRoot`，这个值是没有初始定义，也没有赋值的，所以可以把它看作 `false`，总会执行
+> - 在看你 `start` 配置文件 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=start)] 已注释，但目前源码中还是在的
+> - 这样只要关心 `this.getDisposeResult('shadowDOM')`，假定浏览器支持的话
+>
+> `getDisposeResult`：
+>
+> - 要求 `web component` 有属性 `shadowDOM`，或 `start` 配置 `shadowDOM` 为 `true`
+> - 并且属性值不能为 `false`，这两点合起来看其实逻辑判断是错的
+>
+> 得到的结果：
+>
+> - 默认不启用 `shadDom`，要启动 `shadDOM` 需要配置 `<micro-app shadowDOM />` 属性
+> - 如果通过 `start` 启动 `shadowDOM`，还是要配置组件属性，这就是逻辑错误的地方，当然也不排除开发人员就不想让你开启
+> - 开启 `shadowDOM` 模式只能是 `open`，对外可以访问
+> - 也就是说，默认情况 `micro-app` 不会通过 `shadDom` 做隔离
+> - 而是直接通过 `web component` 去加载应用资源并替换应用里的标签
+> - `css` 默认通过修改作用域进行隔离，例如样式名 `body` 修改为 `micro-app[name={project-name}] micro-app-body`
+> - `js` 默认使用 `withSondbox` 作为沙箱，通过 `proxy` 的方式进行隔离（`iframe` 沙箱也一样通过 `proxy` 做隔离）
+>
 > 注 ⑨：更新 `url`
 >
 > - `getDisposeResult` 检查是否开启 `ssr`，没有则将 `ssrUrl` 设为空，否则往下看
