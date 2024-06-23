@@ -919,7 +919,7 @@ public url: string; // 应用 URL
 - `cloneContainer` 替换容器：当前容器为 `<div prerender='true'>`，将其替换为 `<micro-app>` 元素。
 - 注意：必须在 `this.sandBox.rebuildEffectSnapshot` 和 `this.preRenderEvents?.forEach((cb) => cb())` 执行之前进行替换。
 - `rebuildEffectSnapshot` 重建全局 `effect`：重建 `window`、`document` 和 `data center` 的 `effect` 事件。
-- 恢复之前记录的预渲染事件 `this.preRenderEvents?.forEach`。
+- 恢复之前记录的预渲染事件 `this.preRenderEvents?.forEach((cb) => cb())`。
 - 重置预渲染状态 `isPrerender`、`preRenderEvents`
 - 将路由信息附加到浏览器 URL `router.attachToURL`
 - 设置沙箱的预渲染状态 `this.sandBox?.setPreRenderState(false)`
