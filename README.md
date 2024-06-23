@@ -1083,13 +1083,17 @@ public url: string; // 应用 URL
 目录：`create_app.ts` - `handleMounted` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L371)]
 
 - 挂载应用后只要拿到 `mount` 和 `unmount` 就会执行这个方法
-- 最终都要调用 `dispatchAction`，不同的是预加载只是将方法放入队列 `preRenderEvents`，不会立即执行
+- 方法内通过 `dispatchAction` 触发已挂载事件
+
+预加载应用会稍微不同：
+
+- 不会立即执行 `dispatchAction`，只是将方法放入队列 `preRenderEvents`
 - 除此之外预加载应用还会通过 `recordAndReleaseEffect` 去记录沙箱快照、并清理沙箱 `window effect`、`document effect` 等
 
 `dispatchAction`：
 
 - 无论什么情况都会执行 `nextAction` 去调用 `actionsAfterMounted`
-- 如果有提供挂载的 `promise`，会等处理挂载之后再执行
+- 如果有提供一个 `promise` 挂载队列作为参数，会等处理回调的队列处理完成之后再执行
 
 **补充 `actionsAfterMounted`：**
 
