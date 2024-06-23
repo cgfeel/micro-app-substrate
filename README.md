@@ -966,16 +966,15 @@ public url: string; // 应用 URL
 > 结论：
 >
 > - 应用首次加载的时候 `umdMode` 一定是 `false`
-> - 因此也一定会从子应用中去拿 `mount` 和 `unmount`，之后直接使用之前获取的 `hook` 触发 `handleMounted`
+> - 因此也一定会从子应用中去拿 `mount` 和 `unmount`，之后直接使用之前获取的 `hook` 执行 `handleMounted`
 > - 如果子应用不提供 `mount`，那么不提供 `promise` 去执行 `handleMounted`
 > - 在后续的 `mount` 中也不会再获取子应用的挂载方法，直接根据首次获取的结果执行 `handleMounted`
 
 **沙箱执行脚本补充：**
 
 - 无论是不是 `umd` 模式，最终都会执行 `handleMounted`
-- 不同的是 `isFinished` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行
-- 不是 `umd` 模式，需要从代理的 `window` 对象上获取 `mount` 和 `unmount`
-- 以便在处理 `handleMounted` 前完成挂载
+- 不同的是拿不到 `mount` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行 `handleMounted`
+- 不是 `umd` 模式，需要从沙箱代理的 `window` 对象上获取 `mount` 和 `unmount`、以便在处理 `handleMounted` 前完成挂载沙箱
 
 **补充 `umdMode`：**
 
