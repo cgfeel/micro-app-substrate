@@ -1025,6 +1025,13 @@ public url: string; // 应用 URL
 - 如果是预加载、与渲染、容器是 `div` 的情况下 `fiber` 不会被更新，`script` 也不会队列而是立即执行
 - 上面提到的“预渲染状态”和“常规挂载流程”有详细说明
 
+`injectFiberTask` 补充说明：
+
+- 利用浏览器空闲时间执行，详细见注 ⑭ `injectFiberTask`
+- 在每一个 `injectFiberTask` 微任务中都会去执行回调 `initHook(false)`，
+- 但是 `isFinished` 一定是 `false`，意味着加载资源不一定要求全部都 `isFinished`，也不一定会处理挂载 `handleMounted`
+- 处理挂载唯一要求是从 `sandBox.proxyWindow` 拿到 `mount` 和 `unmount`
+
 **补充 `runScript`：**
 
 在沙箱内执行脚本的方法，通过 `execScripts` 将其放在 `fiberScriptTasks` 队列执行，或立即执行
