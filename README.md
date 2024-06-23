@@ -747,8 +747,8 @@ public url: string; // 应用 URL
 
 `stop` 停止沙箱：
 
-- 撤销 `window`，`document` 的补丁，恢复路由状态，移除历史记录监听器
-- 移除 `iframe` 以及清理一些微应用的全局变量等操作。
+- 撤销 `window`，`document` 的补丁 `recordAndReleaseEffect`，恢复路由状态 `clearRouteState`，移除历史记录监听器 `removeHistoryListener`
+- 移除 `iframe` 以及清理一些微应用的全局变量等操作 `this.escapeKeys`
 
 `createIframeTemplate` 创建 `iframe` 模板：
 
