@@ -932,7 +932,7 @@ public url: string; // 应用 URL
 - 创建并派发 `BEFOREMOUNT` 生命周期事件，如果是预渲染将事件插入 `preRenderEvents` 不立即执行
 - 将应用状态设置为 `MOUNTING`。
 - 向微应用派发 `statechange` 事件，通知应用状态变化。
-- 根据 `umdMode` 决定是深度克隆还是浅克隆容器
+- 根据 `umdMode` 决定是深度克隆还是浅克隆容器 `this.cloneContainer`
 - 启动沙箱 `this.sandBox?.start`，详细见上方沙箱总结
 - 根据 `umdMode` 执行脚本
 
