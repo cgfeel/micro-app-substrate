@@ -125,8 +125,9 @@
 5. `extractSourceDom` 解析资源，将 `css` 通过作用域隔离
 6. 开启沙箱 `IframeSandbox` 或 `WithSandBox`，通过 `proxy` 作为 `JS` 沙箱
 7. 资源处理完毕回调 `onLoad` 触发 `mount`
-8. `execScripts` 在沙箱中执行脚本，`umd` 模式还需记录 `unmount`、触发子应用的 `mount`（和 `qiankun` 一样）
-9. 完成挂载触发 `afterMounted` 挂载完毕事件和通知
+8. `execScripts` 在沙箱中加载、执行脚本
+9. 从 `sandbox.proxyWindow` 中提取 `mount` 和 `unmount` 执行挂载（和 `qiankun` 一样）
+10. 完成挂载触发 `afterMounted` 挂载完毕事件和通知
 
 `micro-app` 是基于 `web component`，在上面演示了 `web component` 特性。所以大致可以想到 `micro-app` 启动流程如下：
 
