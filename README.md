@@ -1129,6 +1129,7 @@ public url: string; // 应用 URL
 >
 > - 将提供的 `script` 脚本内容用 `function` 包裹成模块
 > - 用沙箱提供的 `proxyWindow` 作为参数，作为模块的 `window` 等对象
+> - 模块代码简化例子：`(function(window){ with(window) {} })(proxyWindow)`
 >
 > 注 ⑰：`runCode2InlineScript`
 >
