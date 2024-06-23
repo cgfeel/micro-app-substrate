@@ -1023,11 +1023,11 @@ public url: string; // 应用 URL
 - 由 `app.fiber` 决定是否存在队列
 - 在 `CreateApp` 中只有 2 处定义：① 初始化 `false`，② `mount` 挂载时更新
 - 如果是预加载、与渲染、容器是 `div` 的情况下 `fiber` 不会被更新，`script` 也不会队列而是立即执行
-- 上面提到的预览加载和常规加载有详细说明
+- 上面提到的“预渲染状态”和“常规挂载流程”有详细说明
 
 **补充 `runScript`：**
 
-在沙箱内执行脚本的方法
+在沙箱内执行脚本的方法，通过 `execScripts` 将其放在 `fiberScriptTasks` 队列执行，或立即执行
 
 目录：`scripts.ts` - `runScript` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L481)]
 
