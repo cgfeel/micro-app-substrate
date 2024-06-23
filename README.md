@@ -1068,7 +1068,7 @@ public url: string; // 应用 URL
 >
 > - 如果是内联 `script` 设置内容，否则设置 `src`
 > - 添加 `onload` 事件 `onloadHandler`
-> - 为 `script` 元素添加属性 `setConvertScriptAttr`
+> - `setConvertScriptAttr` 为 `script` 元素添加属性
 >
 > 注 ⑱：`runParsedFunction`
 >
