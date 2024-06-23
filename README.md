@@ -812,7 +812,7 @@ public url: string; // 应用 URL
 - `setMappingPropertiesWithRawDescriptor`：在 `microAppWindow` 对象上设置一些属性映射
 - `initStaticGlobalKeys`：为微应用注入全局属性
 
-> `setMappingPropertiesWithRawDescriptor` 生命 2 个对象 `topValue`、`parentValue`，如果 `iframe` 中分别表示 `top` 和 `parent`，否则统一等于 `window` 对象，然后将获取到的对象，为应用代理的 `microAppWindow` 赋值 `top` 和 `parent` 两个属性。最后遍历 `GLOBAL_KEY_TO_WINDOW` 数组中的每个键（`window`、`self`、`globalThis`），并在 `microAppWindow` 上定义这些属性。每个属性都通过 `createDescriptorForMicroAppWindow` 方法创建，并映射到 `this.proxyWindow`。
+> `setMappingPropertiesWithRawDescriptor` 声明 2 个对象 `topValue`、`parentValue`，如果 `iframe` 中分别表示 `top` 和 `parent`，否则统一等于 `window` 对象，然后将获取到的对象，为应用代理的 `microAppWindow` 赋值 `top` 和 `parent` 两个属性。最后遍历 `GLOBAL_KEY_TO_WINDOW` 数组中的每个键（`window`、`self`、`globalThis`），并在 `microAppWindow` 上定义这些属性。每个属性都通过 `createDescriptorForMicroAppWindow` 方法创建，并映射到 `this.proxyWindow`。
 
 打补丁额外说明：
 
