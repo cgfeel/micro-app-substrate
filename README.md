@@ -1057,7 +1057,7 @@ public url: string; // 应用 URL
 - 获取 `script` 信息 `appSpaceData`，以及沙箱类型 `sandboxType`
 - 根据获取的信息，在 `parsedCode` 不存在时通过 `bindScope` 补全，注 ⑯
 - 内联脚本通过 `runCode2InlineScript` 处理，注 ⑰
-- 非内联脚本通过 `runParsedFunction` 处理，注 ⑱
+- 非内联脚本通过 `runParsedFunction` 立即执行，注 ⑱
 
 > 注 ⑯：`bindScope` 只做一件事
 >
@@ -1069,13 +1069,14 @@ public url: string; // 应用 URL
 > - 如果是内联 `script` 设置内容，否则设置 `src`
 > - 添加 `onload` 事件 `onloadHandler`
 > - `setConvertScriptAttr` 为 `script` 元素添加属性
+> - 执行完成后将 `script` 通过 `parent?.appendChild` 添加到应用容器内
 >
 > 注 ⑱：`runParsedFunction`
 >
 > - 如果 `scriptInfo` 不存在 `parsedFunction`，通过 `getParsedFunction` 生成
 > - `getParsedFunction` 会优先通过 `getExistParseResult` 查找其他应用中是否有相同的执行脚本，将其放回
 > - 如果没有则通过 `code2Function` 使用 `new Function` 生成执行函数
-> - 最终生成的函数通过 `getEffectWindow` 将应用的 `window` 传递过去
+> - 生成的函，最终数通过 `getEffectWindow` 将应用的 `window` 作为上下文立即执行
 
 **补充 `handleMounted`：**
 
