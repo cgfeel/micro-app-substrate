@@ -1096,10 +1096,6 @@ public url: string; // 应用 URL
 >
 > - 和 `qiankun` 一样 `micro-app` 支持在子应用的 `window` 对象上添加 `mount`、`unmount`
 > - 用于为子应用开启 `umd` 模式，详细见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/framework/vue?id=_1%e3%80%81%e5%bc%80%e5%90%afumd%e6%a8%a1%e5%bc%8f%ef%bc%8c%e4%bc%98%e5%8c%96%e5%86%85%e5%ad%98%e5%92%8c%e6%80%a7%e8%83%bd)]
->
-> `umd` 模式 `Vite` 怎么办：
->
-> - 参考 `qiankun` 总结的常见问题 [[查看](https://github.com/cgfeel/micro-qiankun-substrate#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)]
 
 #### 3.2. `handleMounted` 执行挂载应用
 
