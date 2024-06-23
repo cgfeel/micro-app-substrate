@@ -976,13 +976,6 @@ public url: string; // 应用 URL
 - 不同的是拿不到 `mount` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行 `handleMounted`
 - 不是 `umd` 模式，需要从沙箱代理的 `window` 对象上获取 `mount` 和 `unmount`、以便在处理 `handleMounted` 前完成挂载沙箱
 
-**补充 `umdMode`：**
-
-- `CreateApp` 中的属性 `public`，默认是 `false`
-- 这就意味着创建应用的时候默认就“不是 `umdMode`”模式
-- `umdMode` 在外部没有做更新
-- 在内部也只有在 `execScripts` 内部挂载应用的时候更新为 `true`
-
 **补充 `execScripts`：**
 
 `execScripts` 只是一个队列方法，沙箱执行 `script` 还得看放入 `fiberScriptTasks` 的 `runScript`
