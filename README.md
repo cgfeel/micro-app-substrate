@@ -945,7 +945,10 @@ public url: string; // 应用 URL
 **不是 `umdMode`：**
 
 - 更新 `HTML` 元素信息，并在沙箱内执行脚本 `execScripts`
-- 在所有脚本执行完毕后，如果是 `UMD` 模式，获取并调用挂载钩子函数；否则，处理常规挂载完成。
+- 在所有脚本执行完毕后，如果是 `umdMode` 模式，处理应用挂载 `handleMounted`
+- 否则通过 `getUmdLibraryHooks` 提取 `mount` 和 `unmount`
+- 将 `unmount` 交给 `umdHookUnmount`，将 `mount` 交给 `umdHookMount` 以便卸载使用
+- 标记沙箱模式 `markUmdMode` 后，将 `umdHookMount` 作为 `promise` 传给 `handleMounted` 挂载应用
 
 **`umdMode` 模式：**
 
