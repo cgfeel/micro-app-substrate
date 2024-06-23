@@ -356,7 +356,7 @@
 > 关于 `shadowDom`
 >
 > - 先看配置条件 `this.shadowRoot`，这个值是没有初始定义，也没有赋值的，所以可以把它看作 `false`，总会执行
-> - 在看你 `start` 配置文件 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=start)] 已注释，但目前源码中还是在的
+> - 再看启动 `start` 配置文件 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=start)] 已注释，但目前源码中还是在的
 > - 这样只要关心 `this.getDisposeResult('shadowDOM')`，假定浏览器支持的话
 >
 > `getDisposeResult`：
