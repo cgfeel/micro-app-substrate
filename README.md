@@ -1072,10 +1072,10 @@ public url: string; // 应用 URL
 >
 > 注 ⑱：`runParsedFunction`
 >
-> - 如果 `scriptInfo` 不存在对应的方法，通过 `getParsedFunction` 生成
-> - `getParsedFunction` 会优先查找 `scriptInfo.appSpace` 将其返回
+> - 如果 `scriptInfo` 不存在 `parsedFunction`，通过 `getParsedFunction` 生成
+> - `getParsedFunction` 会优先通过 `getExistParseResult` 查找其他应用中是否有相同的执行脚本，将其放回
 > - 如果没有则通过 `code2Function` 使用 `new Function` 生成执行函数
-> - 最终生成的函数通过 `getEffectWindow` 根据情况，传递 `window` 过去执行
+> - 最终生成的函数通过 `getEffectWindow` 将应用的 `window` 传递过去
 
 **补充 `handleMounted`：**
 
