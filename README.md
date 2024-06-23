@@ -880,19 +880,19 @@ public url: string; // 应用 URL
 - 创建沙箱也会在对象中添加微任务的方式，等待 `mount`
 - 资源加载完毕触发 `onLoad` 后，再发起挂载应用前，发起沙箱的 `mount` 方法
 
-接 1.3. `app.onLoad` 加载完成后 [[查看](#13-extractsourcedom-成功加载资源回调)] 调用 `mount`，一个对外公开的方法，做了 3 件事：
+接 1.3. `app.onLoad` 加载完成后 [[查看](#13-extractsourcedom-成功加载资源回调)] 调用 `mount`，一个对外公开的方法：
 
-- 资源没完成加载完成，触发事件并修改状态
-- 创建沙箱、更新状态
-- 挂载应用
+- 2 个情况：资源是否加载完成
 
 **`loadSourceLevel` 资源没完成加载完成：**
 
-主要用于外部调用，比如预加载应用时：
+主要用于外部调用，比如预加载应用时
 
 - 设置容器 `container`，可能是一个用于挂载应用的 `DOM` 元素。
 - 禁用预渲染功能 `this.isPrerender`，这可能是因为代码正在尝试在资源加载完毕之前就开始挂载应用，这种情况下可能无法进行预渲染。
 - 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `statechange`，并将应用的状态 `appState` 修改为 `LOADING`
+
+资源未完成触发 `mount` 会重复执行上述操作，以下全部为资源加载完成后的操作
 
 **创建沙箱、更新状态：**
 
