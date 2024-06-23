@@ -875,7 +875,7 @@ public url: string; // 应用 URL
 回到 `CreateApp` 构造函数，重新捋一遍顺序：
 
 - 发起 `loadSourceCode` 加载资源
-- 发起一个 `createSandbox` 创建沙箱，这两个操作是上下文先后执行的
+- 发起 `createSandbox` 创建沙箱，这两个操作是上下文先后执行的
 - 加载资源会发起一个个微任务的形式执行，`fetch` 后再做相应更新
 - 创建沙箱也会在对象中添加微任务的方式，等待 `mount`
 - 资源加载完毕触发 `onLoad` 后，再发起挂载应用前发起沙箱的 `mount` 方法
