@@ -809,7 +809,7 @@ public url: string; // 应用 URL
 - `patchRouter`：根据应用信息，修正沙箱的 `location` 和子应用的 `history`
 - `patchWindow`：补充 `window` 属性 `patchWindowProperty`，`createProxyWindow` 创建一个 `proxy` 对象代理沙箱环境下的 `window`，`patchWindowEffect` 代理 `addEventListener`、`removeEventListener` 子应用和基座相同事件冲突
 - `patchDocument`：修正 `document` 的 `property`、`prototype`、`eventListener`
-- `setMappingPropertiesWithRawDescriptor`：在 `microAppWindow` 对象上设置一些映射属性
+- `setMappingPropertiesWithRawDescriptor`：在 `microAppWindow` 对象上设置一些属性映射
 - `initStaticGlobalKeys`：为微应用注入全局属性
 
 > `setMappingPropertiesWithRawDescriptor` 生命 2 个对象 `topValue`、`parentValue`，如果 `iframe` 中分别表示 `top` 和 `parent`，否则统一等于 `window` 对象，然后将获取到的对象，为应用代理的 `microAppWindow` 赋值 `top` 和 `parent` 两个属性。最后遍历 `GLOBAL_KEY_TO_WINDOW` 数组中的每个键（`window`、`self`、`globalThis`），并在 `microAppWindow` 上定义这些属性。每个属性都通过 `createDescriptorForMicroAppWindow` 方法创建，并映射到 `this.proxyWindow`。
