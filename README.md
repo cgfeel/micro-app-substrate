@@ -748,7 +748,7 @@ public url: string; // 应用 URL
 `stop` 停止沙箱：
 
 - 撤销 `window`，`document` 的补丁 `recordAndReleaseEffect`，恢复路由状态 `clearRouteState`，移除历史记录监听器 `removeHistoryListener`
-- 移除 `iframe` 以及清理一些微应用的全局变量等操作 `this.escapeKeys`
+- `this.escapeKeys` 移除 `iframe` 以及清理一些微应用的全局变量等操作。
 
 `createIframeTemplate` 创建 `iframe` 模板：
 
@@ -763,7 +763,7 @@ public url: string; // 应用 URL
 `IframeSandbox` 类通过创建和管理 `iframe` 元素，隔离微应用的执行环境，提供了灵活且安全的沙盒机制。它包括：
 
 - 初始化和配置 `iframe` 元素。
-- 代理和修补窗口、文档、路由等。
+- 代理和修补 `window`、`document`、`router` 等。
 - 管理全局状态和事件。
 - 提供启动和停止沙盒的方法。
 
