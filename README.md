@@ -1010,7 +1010,7 @@ public url: string; // 应用 URL
 
 > 当 `moduleCount` 不是 `undefined`，并且资源没有全部加载失败 `isFinished` 为 `false`
 >
-> - `moduleCount` 要求 `script` 为 `module`，且不实用沙箱或使用 `iframe` 沙箱
+> - `moduleCount` 要求 `script` 为 `module`，不使用沙箱或使用 `iframe` 沙箱
 > - `errorCount` 资源失败时增加
 
 `fiberScriptTasks` 执行队列：
