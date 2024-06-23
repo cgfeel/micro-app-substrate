@@ -722,7 +722,7 @@ public url: string; // 应用 URL
 
 - 根据应用名和浏览器路径创建并返回一个 `iframe` 元素
 - 并返回函数用于移除创建的 `iframe`
-- 之后拿到 `ifrrame` 的 `window` 对象作为 `microAppWindow`
+- 之后拿到 `iframe` 的 `window` 对象作为 `microAppWindow`
 - 复制 `microAppWindow` 你会看到 `patchIframe` 整个都在为 `microAppWindow` 打补丁
 
 `patchIframe` 打补丁：
@@ -742,8 +742,8 @@ public url: string; // 应用 URL
 
 `start` 启动沙箱：
 
-- 设置路由状态，添加历史记录监听器
-- 创建并应用 `base` 元素，以及对 `HTML` 元素和 `document` 进行补丁处理等逻辑
+- 设置路由状态 `initRouteState`，添加历史记录监听器 `addHistoryListener`
+- `createIframeBase` 创建并应用 `base` 元素，以及对 `HTML` 元素和 `document` 进行补丁处理等逻辑
 
 `stop` 停止沙箱：
 
