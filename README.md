@@ -978,7 +978,7 @@ public url: string; // 应用 URL
 
 **补充 `execScripts`：**
 
-`execScripts` 只是一个队列方法，沙箱执行 `script` 还得看放入 `fiberScriptTasks` 的 `runScript`
+`execScripts` 只是一个队列方法，在沙箱中执行 `script`，重点在放入 `fiberScriptTasks` 的 `runScript`
 
 目录：`scripts.ts` - `execScripts` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L396)]
 
@@ -990,12 +990,23 @@ public url: string; // 应用 URL
 流程：
 
 - 先看结果，无论哪种结果都会执行 `initHook`
-- 遍历 `app.source.scripts`，有延迟塞入队列 `deferScriptPromise` 稍后加载
-- 没有延迟，知己通过 `injectFiberTask` 将沙箱执行放入队列 `fiberScriptTasks`
-- `deferScriptPromise` 存在队列，依次加载后将沙箱执行放入队列 `fiberScriptTasks`
-- 至此对于上面两种情况只要 `fiberScriptTasks` 存在队列，就会通过 `serialExecFiberTasks` 执行
-- 也就会在沙箱中执行 `script`
-- 但是对于上两种情况都没有拿到 `fiberScriptTasks` 的情况就只能回调执行 `initHook`
+- 遍历 `app.source.scripts`，有延迟或者是异步加载，塞入队列 `deferScriptPromise` 稍后加载
+- 否则通过 `injectFiberTask` 将沙箱放入 `fiberScriptTasks` 中队列执行
+
+`deferScriptPromise` 延迟队列：
+
+- 存在延迟队列，通过 `promiseStream` 将 `fetch` 的资源依次下载
+- 然后通过 `injectFiberTask` 将沙箱放入 `fiberScriptTasks` 中队列执行
+- 如果不存在延迟队列队列，但存在执行队列 `fiberScriptTasks`，将回调方法 `initHook` 添加到队列末尾
+- 通过 `serialExecFiberTasks` 拍平 `promise` 执行队列
+- 对于没有延迟队列，也没有执行队列的情况，就只能回调执行 `initHook`
+
+`fiberScriptTasks` 执行队列：
+
+- 由 `app.fiber` 决定是否存在队列
+- 在 `CreateApp` 中只有 2 处定义：① 初始化 `false`，② `mount` 挂载时更新
+- 如果是预加载、与渲染、容器是 `div` 的情况下 `fiber` 不会被更新，`script` 也不会队列而是立即执行
+- 上面提到的预览加载和常规加载有详细说明
 
 **补充 `runScript`：**
 
