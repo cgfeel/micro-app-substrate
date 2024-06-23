@@ -933,8 +933,8 @@ public url: string; // 应用 URL
 - 将应用状态设置为 `MOUNTING`。
 - 向微应用派发 `statechange` 事件，通知应用状态变化。
 - 根据 `umdMode` 决定是深度克隆还是浅克隆容器 `this.cloneContainer`
-- 启动沙箱 `this.sandBox?.start`，详细见上方沙箱总结
-- 根据 `umdMode` 执行脚本
+- 启动沙箱 `this.sandBox?.start`，见 2.1. 创建沙箱 [[查看](#21-createsandbox-创建沙箱)]
+- 根据 `umdMode` 模式执行脚本
 
 > `preRenderEvents` 设置有段代码很有意思：`(this.preRenderEvents ??= []).push(dispatchBeforeMount)`
 >
