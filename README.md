@@ -973,12 +973,12 @@ public url: string; // 应用 URL
 **沙箱执行脚本补充：**
 
 - 无论是不是 `umd` 模式，最终都会执行 `handleMounted`
-- 不同的是拿不到 `mount` 下不用等待 `umdHookMount` 这个 `prmose` 结束在执行 `handleMounted`
+- 不同的是拿不到 `mount` 下不用等待 `umdHookMount` 这个 `prmose` 结束再执行 `handleMounted`
 - 不是 `umd` 模式，需要从沙箱代理的 `window` 对象上获取 `mount` 和 `unmount`、以便在处理 `handleMounted` 前完成挂载沙箱
 
 **补充 `execScripts`：**
 
-`execScripts` 只是一个队列方法，在沙箱中执行 `script`，重点在放入 `fiberScriptTasks` 的 `runScript`
+`execScripts`在沙箱中执行 `script`，重点在放入 `fiberScriptTasks` 的 `runScript`，队列执行脚本
 
 目录：`scripts.ts` - `execScripts` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/scripts.ts#L396)]
 
