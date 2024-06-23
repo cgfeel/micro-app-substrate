@@ -548,14 +548,14 @@
 
 目录：`index.ts` - `extractSourceDom` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/source/index.ts#L82)]
 
-- 先通过 `app.parseHtmlString` 解析加载的 `html` 资源，注 ⑫
+- 先通过 `app.parseHtmlString` 将加载的 `html` 字符转换成 `HTMLElement`，记录在 `wrapElement`，注 ⑫
 - 查找 `micro-app-head` 和 `micro-app-body`，如果都不存在报错返回
 - 创建一个 `fiberStyleTasks` 用于收集加载的样式队列，注 ⑬
 - 使用 `flatChildren` 递归处理每一个子集元素，注 ⑭
 - 使用 `serialExecFiberTasks` 将 `flatChildren` 队列执行，过程见下方注解
 - 如果应用加载过程中获取到 `css` 资源，通过 `fetchLinksFromHtml` 挨个获取，注 ⑮
 - 如果应用加载过程中获取到 `js` 资源，通过 `fetchScriptsFromHtml` 挨个获取
-- 加载完资源最终会触发 `app.onLoad`
+- 加载完资源最终会调用 `app.onLoad`，将最开始拿到的 `wrapElement` 作为参数属性 `html` 传过去
 
 在 `app.onLoad` 中只判断资源是否加载完毕，加载完毕执行 `mount`
 
@@ -568,8 +568,13 @@
 >
 > - 假定不预加载，在 `CreateApp` 找 `fiber` 有两处
 > - 第一处初始化 `false`，第二处 `mount` 更新
-> - 这样如果应用不是预加载将不会使用队列 `fiberStyleTasks` 来收集 `inner style`
-> - 而是立即执行每一个 `scopedCSS`
+> - 而 `mount` 更新受两处影响，第一处是 `onLoad` 中 `this.isPrefetch && this.isPrerender`
+> - 第二处是 `!this.isPrefetch` 时，根据 `web component` 属性是否设置了 `fiber` 来决定
+> - 这样就把范围大致缩小到 3 个：预加载、预渲染、`web component` 属性设置
+>
+> 如果 `fiberStyleTasks` 是 `null` 会发生什么：
+>
+> - 不会使用队列 `fiberStyleTasks` 来收集 `inner style`，而是立即执行每一个 `scopedCSS`
 > - 这种情况 `serialExecFiberTasks` 返回的 `fiberStyleResult` 也是 `null`
 > - 导致的结果是所有的方法都是立即执行，不会队列，也不会通过 `injectFiberTask` 利用浏览器空闲加载
 >
@@ -895,7 +900,9 @@ public url: string; // 应用 URL
 - 不同的沙箱虽然特性有差异，但是最为沙箱公共特性的这部分居然没有统一的 `implements`
 - 作为使用者，可以不用逐行阅读沙箱源码，建议查看上方对提供的方法总结，只关注输入的参数和输出的类型
 
-#### 3.1. `mount` 挂载应用
+#### 3.1. `onLoad` 加载完毕
+
+接 1.3. `extractSourceDom` 成功加载资源回调后 [[查看](#13-extractsourcedom-成功加载资源回调)] 调用 `app.onLoad`
 
 回到 `CreateApp` 构造函数，重新捋一遍顺序：
 
@@ -905,9 +912,41 @@ public url: string; // 应用 URL
 - 创建沙箱也会在对象中添加微任务的方式，等待 `mount`
 - 资源加载完毕触发 `onLoad` 后，再发起挂载应用前，发起沙箱的 `mount` 方法
 
-接 1.3. `app.onLoad` 加载完成后 [[查看](#13-extractsourcedom-成功加载资源回调)] 调用 `mount`，一个对外公开的方法：
+再回到 `onLoad` 看流程：
 
-- 2 个情况：资源是否加载完成
+- 首先资源没有加载完 `++this.loadSourceLevel === 2` 是一定不会做任何操作
+- 将加载的 `html` 对象记录在 `source.html`，以便在 `mount` 的时候克隆到容器中
+- 应用已卸载的情况下返回不继续处理
+- 不是预加载的情况 `isPrefetch`，触发 `web component` 的 `mount` 方法，而 `web component` 会绕回来调用 `app.mount`
+- 是预加载又是预渲染 `isPrerender`，创建个 `div` 作为容器，设置沙箱 `setPreRenderState`，调用 `app.mount`
+- 其他情况不做处理，整个流程到此结束，例如：预加载，但不预渲染
+
+“不是预加载”和“预加载&预渲染”都会调用 `mount`，但有些许差别
+
+- `routerMode`、`baseroute`、`defaultPage`：“预加载&预渲染”路由模式永远为空值
+- `disablePatchRequest`：“预加载&预渲染”路由模式永远为 `false`，而 “不是预加载” 由 `web component` 属性决定
+- `fiber`：“预加载&预渲染”路由模式永远为 `true`，查看，而“不是预加载” 由 `web component` 属性决定
+
+> `disablePatchRequest` 为 `false` 在 `iframe` 沙箱中会在头部创建一个 `base` 元素，用于指向指定的 `location.pathname`，默认的沙箱 `WithSandbox` 中会重写 `fetch`、`XMLHttpRequest`、`EventSource`
+
+`isPrefetch` 和 `isPrerender`：
+
+- `CreateApp` 中除了构造函数全部为 `false`，也就是说内部不会有更新为 `true` 的情况
+- 而调用 `CreateApp` 有 2 处，见：1.2. `HTMLLoader` 加载资源 [[查看](#12-htmlloader-加载资源)] 中 `HTMLLoader` 部分
+- 先看自定义组件 `MicroAppElement`，`new CreateApp` 时没有 `isPrefetch` 和 `isPrerender`，可以排除
+- `start` 启动预加载时 `isPrefetch` 为 `true`，`prefetchLevel` 根据提供预加载的 `level` 来决定，`prefetchLevel` 为 3 的情况下开启预渲染 `isPrerender`
+
+结论：
+
+- 挂载应用的时候一定是：“不是预加载”
+- 预加载应用的时候一定是：“预加载”，但不一定是 “预渲染”
+- 预加载应用且 `level` 是 3 的时候：“预加载&预渲染”
+
+下面是在这两个模式：“不是预加载”和“预加载&预渲染”，作为前提继续描述
+
+#### 3.2. `mount` 挂载应用
+
+一个对外公开的方法，包含 2 个情况：资源是否加载完成
 
 **`loadSourceLevel` 资源没完成加载完成：**
 
@@ -1122,7 +1161,7 @@ public url: string; // 应用 URL
 > - 和 `qiankun` 一样 `micro-app` 支持在子应用的 `window` 对象上添加 `mount`、`unmount`
 > - 用于为子应用开启 `umd` 模式，详细见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/framework/vue?id=_1%e3%80%81%e5%bc%80%e5%90%afumd%e6%a8%a1%e5%bc%8f%ef%bc%8c%e4%bc%98%e5%8c%96%e5%86%85%e5%ad%98%e5%92%8c%e6%80%a7%e8%83%bd)]
 
-#### 3.2. `handleMounted` 执行挂载应用
+#### 3.3. `handleMounted` 执行挂载应用
 
 目录：`create_app.ts` - `handleMounted` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L371)]
 
