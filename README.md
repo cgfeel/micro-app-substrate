@@ -928,7 +928,7 @@ public url: string; // 应用 URL
 
 如果不处于预渲染状态，执行以下操作：
 
-- 设置容器、内联模式状态、纤程模式和路由模式：`container`、`inline`、`fiber`、`routerMode`
+- `container` 设置容器、`inline` 内联模式状态、`fiber` 纤程模式和 `routerMode` 路由模式
 - 创建并派发 `BEFOREMOUNT` 生命周期事件，如果是预渲染将事件插入 `preRenderEvents` 不执行
 - 将应用状态设置为 `MOUNTING`。
 - 向微应用派发 `statechange` 事件，通知应用状态变化。
