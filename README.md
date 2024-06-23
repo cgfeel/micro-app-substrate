@@ -141,7 +141,7 @@
 
 ### `microApp.start` 启动应用
 
-直接从 `start` 方法开始
+从 `start` 方法开始
 
 目录：`micro_app.ts` - `MicroApp` - `start` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app.ts#L284)]
 
@@ -228,6 +228,8 @@
 >
 > - 只修正子应用 `plugins.modules`，不修正 `plugins.global`
 > - 将不符合驼峰规范的 `key` 转换后，重新赋值并删除之前的 `key`
+
+配置信息通过 `microApp.start` 设置，`microApp` 是 `MicroApp` 的唯一实例，`MicroApp` 类是不对外公开的，而 `microApp` 对象公开。所以如果要获取配置信息，可以直接从 `microApp.options` 上获取。
 
 ### `defineElement` 自定义组件 `MicroAppElement`
 
@@ -372,7 +374,7 @@
 > - 也就是说，默认情况 `micro-app` 不会通过 `shadDom` 做隔离
 > - 而是直接通过 `web component` 去加载应用资源并替换应用里的标签
 > - `css` 默认通过修改作用域进行隔离，例如样式名 `body` 修改为 `micro-app[name={project-name}] micro-app-body`
-> - `js` 默认使用 `withSondbox` 作为沙箱，通过 `proxy` 的方式进行隔离（`iframe` 沙箱也一样通过 `proxy` 做隔离）
+> - `js` 默认使用 `WithSondbox` 作为沙箱，通过 `proxy` 的方式进行隔离（`iframe` 沙箱也一样通过 `proxy` 做隔离）
 >
 > 注 ⑨：更新 `url`
 >
