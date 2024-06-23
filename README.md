@@ -1012,6 +1012,11 @@ public url: string; // 应用 URL
 >
 > - `moduleCount` 要求 `script` 为 `module`，不使用沙箱或使用 `iframe` 沙箱
 > - `errorCount` 资源失败时增加
+>
+> `isFinished` 为 `false` 带来的后果：
+>
+> - 首次挂载时不执行 `handleMounted` 处理挂载
+> - 但这并不意味着不会触发 `handleMounted`，如果 `getUmdLibraryHooks` 也没有提取到 `mount`，在下次执行 `mount` 时依旧会重新走一遍上述流程
 
 `fiberScriptTasks` 执行队列：
 
