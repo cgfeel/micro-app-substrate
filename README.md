@@ -896,8 +896,8 @@ public url: string; // 应用 URL
 
 **创建沙箱、更新状态：**
 
-- `createSandbox` 上面已总结过了，构建时会尽可能创建沙箱，并存储在 `sandBox`，后续根据这个对象判断是否创建
-- `this.setAppState` 之后将应用的状态 `appState` 修改为 `BEFORE_MOUNT`
+- `createSandbox` 见 2.1. 创建沙箱 [[查看](#21-createsandbox-创建沙箱)]，构建时会尽可能创建沙箱，并存储在 `sandBox` 对象
+- 之后将应用的状态修改为 `BEFORE_MOUNT`
 
 **`nextAction` 挂载应用：**
 
