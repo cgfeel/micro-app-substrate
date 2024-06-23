@@ -929,12 +929,18 @@ public url: string; // 应用 URL
 如果不处于预渲染状态，执行以下操作：
 
 - `container` 设置容器、`inline` 内联模式状态、`fiber` 纤程模式和 `routerMode` 路由模式
-- 创建并派发 `BEFOREMOUNT` 生命周期事件，如果是预渲染将事件插入 `preRenderEvents` 不执行
+- 创建并派发 `BEFOREMOUNT` 生命周期事件，如果是预渲染将事件插入 `preRenderEvents` 不立即执行
 - 将应用状态设置为 `MOUNTING`。
 - 向微应用派发 `statechange` 事件，通知应用状态变化。
 - 根据 `umdMode` 决定是深度克隆还是浅克隆容器
 - 启动沙箱 `this.sandBox?.start`，详细见上方沙箱总结
 - 根据 `umdMode` 执行脚本
+
+> `preRenderEvents` 设置有段代码很有意思：`(this.preRenderEvents ??= []).push(dispatchBeforeMount)`
+>
+> - 可以先把它拆成 `this.preRenderEvents ?? []`，就相当于当值是 `null` 或 `undefined` 时使用 `[]`
+> - 这里不同的是多了一个等号 `??=`，就相当于将得到的值 `[]` 赋值给 `this.preRenderEvents`
+> - 之后通过 `().push()` 的方式插入 `item`
 
 **不是 `umdMode`：**
 
