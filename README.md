@@ -1255,7 +1255,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 
 过程如下：
 
-- `react` 销毁组件
+- 销毁 `react` 组件
 - 销毁组件 `disconnectedCallback`，不提供任何参数
 - 处理 `handleDisconnected`：`destroy` 为 `false`，没有 `callback`
 - 执行 `unmount`：`destroy`、`clearData`、`keepRouteState` 全部为 `false`，没有 `callback`
