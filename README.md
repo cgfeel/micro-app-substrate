@@ -1346,7 +1346,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 1. `handleConnected`：加载一个断开的应用，且 `url` 没有发生变化时，触发场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
 2. `actionsForAttributeChange`：修改在线已断开的应用，且 `url` 没有发生变化时，详细见：1.1 观察属性修改： [[查看](#11-attributechangedcallback-观察属性修改)]
 
-#### 1.2. 连接应用 - `app.showKeepAliveApp`
+#### 2.2. 连接应用 - `app.showKeepAliveApp`
 
 目录：`create_app.ts` - `showKeepAliveApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L645)]
 
