@@ -1224,7 +1224,7 @@ public url: string; // 应用 URL
 
 #### 3.4. `unmount` 挂载应用
 
-接 3.2 执行卸载 [[查看](#32-disconnectedcallback-卸载组件)]
+接 3.2 执行卸载 [[查看](##32-handledisconnected-执行卸载)]
 
 目录：`create_app.ts` - `unmount` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L451)]
 
@@ -1237,7 +1237,7 @@ public url: string; // 应用 URL
 
 先看执行场景有 2 个：
 
-- 组件卸载 `unmount`，见组件卸载场景 [[查看](#32-disconnectedcallback-卸载组件)]
+- 组件卸载 `unmount`，见组件卸载场景 [[查看](#32-handledisconnected-执行卸载)]
 - 手动卸载 `unmountApp`，使用方式见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=unmountapp)]
 
 手动卸载时参数由传入的 `options` 来决定，主要看组件卸载这部分：
