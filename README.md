@@ -1334,7 +1334,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 - 如果应用 `level` 是 2：创建一个新的 `div`，将容器的 `children` 拷贝放进去
 - 最后执行回调，以便应用重载这样的场景重新挂载
 
-#### 2.1. 连接应用
+#### 2.1. 连接应用 - `handleShowKeepAliveApp`
 
 目录：`micro_app_element.ts` - `handleShowKeepAliveApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L442)]
 
