@@ -449,6 +449,7 @@
 4. 调整已挂载组件的 `name` 或者 `url`：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
 5. 预渲染的应用重建：`handleCreateApp` - `unmount`
 
+> - 断开 `keep-alive` 流程见：1.1. 断开应用 - 销毁组件 [[查看](#11-断开应用---销毁组件)]
 > - 组件重载：最后回调挂载应用 `handleConnected`
 > - 调整已挂载组件：最后回调挂载创建或挂载应用 `actionsForAttributeChange`
 > - 预渲染的应用重建：最后回调创建应用 `createAppInstance`，`handleCreateApp` 调用场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)] `handleCreateApp` 相关内容
