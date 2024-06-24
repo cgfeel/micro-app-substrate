@@ -1362,6 +1362,6 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 - `dispatchLifecyclesEvent` 向父应用派发 `BEFORESHOW` 生命周期事件
 - 通过 `setKeepAliveState` 设置 `keep-alive` 状态为 `KEEP_ALIVE_SHOW`
 - 通过 `cloneContainer` 将 `oldContainer` 的 `children` 拷贝到当前容器中
-- 如果路由是 `search` 模式需在生命周期事件之前缓存 `this.sandBox?.setRouteInfoForKeepAliveApp()`
+- 如果路由是 `search` 模式需在沙箱生命周期事件之前缓存 `this.sandBox?.setRouteInfoForKeepAliveApp()`
 - 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，通知状态 `aftershow`
 - `dispatchLifecyclesEvent` 向父应用派发 `AFTERSHOW` 生命周期事件
