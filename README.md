@@ -1261,7 +1261,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 - 执行 `unmount`：`destroy`、`clearData`、`keepRouteState` 全部为 `false`，没有 `callback`
 - 卸载应用 `app.unmount`
 
-接上面常见看 `app.unmount` 的流程：
+接上面流程看 `app.unmount` 的流程：
 
 - 只要不是应用加载失败的情况下不会强制销毁应用 `destroy`
 - 更新应用状态 `UNMOUNT`
