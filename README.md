@@ -1260,3 +1260,37 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 - 处理 `handleDisconnected`：`destroy` 为 `false`，没有 `callback`
 - 执行 `unmount`：`destroy`、`clearData`、`keepRouteState` 全部为 `false`，没有 `callback`
 - 卸载应用 `app.unmount`
+
+接上面常见看 `app.unmount` 的流程：
+
+- 只要不是应用加载失败的情况下不会强制销毁应用 `destroy`
+- 更新应用状态 `UNMOUNT`
+- 处理卸载 `handleUnmounted`
+
+> 处理卸载前还记得挂载 `umd` 模式的应用时取 `unmount` 吧
+>
+> - 如果存在的情况下会通过 `this.umdHookUnmount` 记录
+> - 将应用信息 `microApp.getData(this.name, true)` 作为参数触发 `unmount`
+> - `unmount` 函数可以返回一个 `promise` 作为微任务
+
+`handleUnmounted` 处理卸载：
+
+- 触发自定义事件 `statechange`，通知 `UNMOUNT`
+- 触发 `unmount` 事件
+- 在子应用上拿到 `window.onunmount`，存在即触发
+- 将 `actionsAfterUnmounted` 作为微任务在最后执行
+- 如果 `this.umdHookUnmount` 返回的是一个 `promise`，会优先执行返回的微任务
+
+`actionsAfterUnmounted` 完成卸载：
+
+- `umd` 模式下还原容器：`cloneContainer`
+- 关闭沙箱 `this.sandBox?.stop`
+- `dispatchLifecyclesEvent` 向父应用派发 `UNMOUNT` 生命周期事件
+- `clearOptions` 重置应用属性
+- 提供 `unmountcb` 的话执行回调，也就是上面说的当组件需要重新挂载的时候需要用到
+
+`clearOptions` 重置属性：
+
+- 还原：`isPrerender`、`preRenderEvents`、`keep-alive`、`container`、`sandbox`
+- 如果提供 `destory` 则执行完全销毁 `actionsForCompletelyDestroy`
+- 删除 `DOM` 作用域 `removeDomScope`
