@@ -335,7 +335,7 @@
 #### 2.2 `disconnectedCallback` 卸载组件：
 
 - 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
-- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-disconnectedcallback-卸载组件)]
+- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-handledisconnected-执行卸载)]
 
 #### 3.1 `handleConnected` 首次加载
 
