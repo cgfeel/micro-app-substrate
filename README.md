@@ -335,11 +335,11 @@
 #### 2.2 `disconnectedCallback` 卸载组件：
 
 - 在映射表 `this.connectStateMap` 将当前应用设置为 `false`
-- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-handledisconnected-卸载操作)]
+- 执行卸载操作 `handleDisconnected`，见 3.2 卸载操作 [[查看](#32-disconnectedcallback-卸载组件)]
 
 #### 3.1 `handleConnected` 首次加载
 
-称作首次加载来自与备注：`first mount of this app`，其实会分别在这些场合触发：
+接 2.1 挂载组件 [[查看](#21-connectedcallback-挂载组件)]，称作首次加载来自与备注：`first mount of this app`，其实会分别在这些场合触发：
 
 - `handleInitialNameAndUrl`：修改属性后，包括首次赋值
 - `connectedCallback`：已挂载组件时
@@ -421,12 +421,9 @@
 - 挂载了执行 `handleAttributeUpdate`
 - 这样无论是新增，还是修改组件属性、还是重载，都能保证通过 `handleConnected` 创建或挂载应用
 
-#### 3.2 `disconnectedCallback` 卸载组件
+#### 3.2 `handleDisconnected` 执行卸载
 
-- `this.connectStateMap.set` 修改映射表将当前组件改为 `false`
-- 执行卸载 `handleDisconnected`
-
-`handleDisconnected` 执行卸载：
+接 2.2 卸载组件 [[查看](#22-disconnectedcallback-卸载组件)]：
 
 - `appInstanceMap` 先拿到应用信息，确保应用存在、没有被卸载、不是隐藏
 - 如果是 `keep-alive` 模式仅断开应用：`app.hiddenKeepAliveApp`
