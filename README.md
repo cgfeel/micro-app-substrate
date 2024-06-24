@@ -1357,7 +1357,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 流程：
 
 - 记录当前的容器为 `oldContainer`，更新当前容器，要求必须在重建沙箱 `rebuildEffectSnapshot` 之前
-- 重建沙箱 `effect` 快照片 `rebuildEffectSnapshot`
+- 重建沙箱 `effect` 快照 `rebuildEffectSnapshot`
 - 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，通知状态 `beforeshow`
 - `dispatchLifecyclesEvent` 向父应用派发 `BEFORESHOW` 生命周期事件
 - 通过 `setKeepAliveState` 设置 `keep-alive` 状态为 `KEEP_ALIVE_SHOW`
