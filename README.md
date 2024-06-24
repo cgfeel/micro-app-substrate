@@ -399,7 +399,7 @@
 
 > 在 `CreateApp` 构造中会重新设置实例 `appInstanceMap`，作为所有应用实例的映射表
 >
-> 调用 `handleCreateApp` 有 2 个情况：`handleConnected`
+> 调用 `handleCreateApp` 有 2 个情况：
 >
 > - `handleConnected` 首次挂载应用，包含：挂载预加载、已卸载、未加载的应用
 > - 调整挂载组件属性：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
