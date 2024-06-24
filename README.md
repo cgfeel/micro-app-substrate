@@ -398,6 +398,11 @@
 - 实例不存在，直接创建应用 `createAppInstance`
 
 > 在 `CreateApp` 构造中会重新设置实例 `appInstanceMap`，作为所有应用实例的映射表
+>
+> 调用 `handleCreateApp` 有 2 个情况：`handleConnected`
+>
+> - `handleConnected` 首次挂载应用，包含：挂载预加载、已卸载、未加载的应用
+> - 调整挂载组件属性：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
 
 再说更新，修改实例前会先拿到应用信息，和当前的信息进行比对：
 
@@ -430,6 +435,19 @@
 - 否则卸载应用 `this.unmount(destroy, callback)`
 
 **`unmount` 卸载应用**
+
+先看调用场景有 4 处：
+
+- 组件卸载：`disconnectedCallback` - `handleDisconnected` - `unmount`
+- 命令行组件重载：`reload` - `handleDisconnected` - `unmount`
+- 调整已挂载组件的 `name` 或者 `url`：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
+- 创建预渲染的应用：`handleCreateApp` - `unmount`
+
+> - 组件重载：最后回调挂载应用 `handleConnected`
+> - 调整已挂载组件：最后回调挂载创建或挂载应用 `actionsForAttributeChange`
+> - 创建预渲染的应用：最后回调创建应用 `createAppInstance`，关于 `handleCreateApp`
+
+流程：
 
 - 获取应用实例 `appInstanceMap`，判断应用没有卸载 `!app.isUnmounted()`
 - 执行卸载 `app.unmount`
@@ -1199,4 +1217,4 @@ public url: string; // 应用 URL
 
 #### 3.4. `unmount` 挂载应用
 
-接
+接 3.2 执行卸载 [[查看](#32-disconnectedcallback-卸载组件)]，流程如下：
