@@ -446,11 +446,11 @@
 - 组件卸载：`disconnectedCallback` - `handleDisconnected` - `unmount`
 - 命令行组件重载：`reload` - `handleDisconnected` - `unmount`
 - 调整已挂载组件的 `name` 或者 `url`：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
-- 创建预渲染的应用：`handleCreateApp` - `unmount`
+- 预渲染的应用重建：`handleCreateApp` - `unmount`
 
 > - 组件重载：最后回调挂载应用 `handleConnected`
 > - 调整已挂载组件：最后回调挂载创建或挂载应用 `actionsForAttributeChange`
-> - 创建预渲染的应用：最后回调创建应用 `createAppInstance`，`handleCreateApp` 调用场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)] `handleCreateApp` 相关内容
+> - 预渲染的应用重建：最后回调创建应用 `createAppInstance`，`handleCreateApp` 调用场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)] `handleCreateApp` 相关内容
 >
 > 以上所有场景，除了组件卸载其他都会在 `mount` 之后回调挂载或重新创建应用
 
