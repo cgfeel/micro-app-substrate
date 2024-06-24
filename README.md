@@ -1309,7 +1309,7 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 反着来看 `keep-alive` 模式，还是回到 3.2 执行卸载 [[查看](#32-handledisconnected-执行卸载)] 开始：
 
 - 当应用开启 `keep-alive` 模式 `getKeepAliveModeResult`，又不是强制销毁，断开应用处理 `handleHiddenKeepAliveApp`
-- 执行场景见 `handleDisconnected` [[查看](#32-handledisconnected-执行卸载)]
+- 执行场景参考 `handleDisconnected` [[查看](#32-handledisconnected-执行卸载)]
 
 `handleHiddenKeepAliveApp` 断开应用：
 
@@ -1326,9 +1326,42 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 流程：
 
 - 通过 `setKeepAliveState` 设置 `keep-alive` 状态为 `KEEP_ALIVE_HIDDEN`
-- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，`afterhidden` 事件需要提前发送，原因见源码备注
+- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，`afterhidden` 事件需要提前发送，原因见源码备注 [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L600)]
 - `dispatchLifecyclesEvent` 向父应用派发 `AFTERHIDDEN` 生命周期事件
 - 如果路由是 `search` 模式需要清理下路由的生命周期事件 `this.sandBox?.removeRouteInfoForKeepAliveApp()`
 - 如果应用 `level` 不是 2：解析静态资源成可执行代码，卸载应用 `mount`，详细见：3.4. 挂载应用 [[查案](#34-unmount-挂载应用)]
 - 如果应用 `level` 是 2：创建一个新的 `div`，将容器的 `children` 拷贝放进去
 - 最后执行回调，以便应用重载这样的场景重新挂载
+
+#### 2.1. 连接应用
+
+目录：`micro_app_element.ts` - `handleShowKeepAliveApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L442)]
+
+接收应用实例作为参数，只做一件事：
+
+- 创建一个微任务去执行 `app.showKeepAliveApp`，将应用容器作为参数传过去
+
+执行场景：
+
+1. `handleConnected`：加载一个断开的应用，且 `url` 没有发生变化时，触发场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)]
+2. `actionsForAttributeChange`：修改在线已断开的应用，且 `url` 没有发生变化时，详细见：1.1 观察属性修改： [[查看](#11-attributechangedcallback-观察属性修改)]
+
+#### 1.2. 连接应用 - `app.showKeepAliveApp`
+
+目录：`create_app.ts` - `showKeepAliveApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L645)]
+
+参数：
+
+- `container`：应用容器
+
+流程：
+
+- 记录当前的容器为 `oldContainer`，更新当前容器，要求必须在重建沙箱 `rebuildEffectSnapshot` 之前
+- 重建沙箱 `effect` 快照片 `rebuildEffectSnapshot`
+- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，通知状态 `beforeshow`
+- `dispatchLifecyclesEvent` 向父应用派发 `BEFORESHOW` 生命周期事件
+- 通过 `setKeepAliveState` 设置 `keep-alive` 状态为 `KEEP_ALIVE_SHOW`
+- 通过 `cloneContainer` 将 `oldContainer` 的 `children` 拷贝到当前容器中
+- 如果路由是 `search` 模式需在生命周期事件之前缓存 `this.sandBox?.setRouteInfoForKeepAliveApp()`
+- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，通知状态 `aftershow`
+- `dispatchLifecyclesEvent` 向父应用派发 `AFTERSHOW` 生命周期事件
