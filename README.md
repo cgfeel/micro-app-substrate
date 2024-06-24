@@ -441,18 +441,19 @@
 
 **`unmount` 卸载应用**
 
-先看调用场景有 4 处：
+先看调用场景有 5 处：
 
-- 组件卸载：`disconnectedCallback` - `handleDisconnected` - `unmount`
-- 命令行组件重载：`reload` - `handleDisconnected` - `unmount`
-- 调整已挂载组件的 `name` 或者 `url`：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
-- 预渲染的应用重建：`handleCreateApp` - `unmount`
+1. 组件卸载：`disconnectedCallback` - `handleDisconnected` - `unmount`
+2. 断开 `keep-alive` 模式的应用，且应用 `level` 不是 2：解析静态资源成可执行代码
+3. 命令行组件重载：`reload` - `handleDisconnected` - `unmount`
+4. 调整已挂载组件的 `name` 或者 `url`：`attributeChangedCallback` - `handleAttributeUpdate` - `unmount`
+5. 预渲染的应用重建：`handleCreateApp` - `unmount`
 
 > - 组件重载：最后回调挂载应用 `handleConnected`
 > - 调整已挂载组件：最后回调挂载创建或挂载应用 `actionsForAttributeChange`
 > - 预渲染的应用重建：最后回调创建应用 `createAppInstance`，`handleCreateApp` 调用场景见：3.1 首次加载 [[查看](#31-handleconnected-首次加载)] `handleCreateApp` 相关内容
 >
-> 以上所有场景，除了组件卸载其他都会在 `mount` 之后回调挂载或重新创建应用
+> 以上所有场景除了 1 和 2 其它都会在 `mount` 之后回调挂载或重新创建应用
 
 流程：
 
@@ -1235,9 +1236,10 @@ public url: string; // 应用 URL
 - `keepRouteState`：保持路由状态，默认是 `false`
 - `unmountcb`：卸载之后的回调
 
-先看执行场景有 2 个：
+先看执行场景有 3 个：
 
 - 组件卸载 `unmount`，见组件卸载场景 [[查看](#32-handledisconnected-执行卸载)]
+- 断开 `keep-alive` 模式的引用，而引用的 `level` 不是 2: 解析静态资源成可执行代码
 - 手动卸载 `unmountApp`，使用方式见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=unmountapp)]
 
 手动卸载时参数由传入的 `options` 来决定，主要看组件卸载这部分：
@@ -1294,3 +1296,38 @@ const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
 - 还原：`isPrerender`、`preRenderEvents`、`keep-alive`、`container`、`sandbox`
 - 如果提供 `destory` 则执行完全销毁 `actionsForCompletelyDestroy`
 - 删除 `DOM` 作用域 `removeDomScope`
+
+### `keep-alive` 模式
+
+了解挂载和卸载基本就结束了，最后再补充一个 `keep-alive` 模式，查案官方文档说明 [[查案](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/configure?id=keep-alive)]
+
+#### 1.1. 断开应用 - 销毁组件
+
+目录：`micro_app_element.ts` - `handleDisconnected` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/micro_app_element.ts#L124)]
+
+反着来看 `keep-alive` 模式，还是回到 3.2 执行卸载 [[查看](#32-handledisconnected-执行卸载)] 开始：
+
+- 当应用开启 `keep-alive` 模式 `getKeepAliveModeResult`，又不是强制销毁，断开应用处理 `handleHiddenKeepAliveApp`
+- 执行场景见 `handleDisconnected` [[查看](#32-handledisconnected-执行卸载)]
+
+`handleHiddenKeepAliveApp` 断开应用：
+
+- 应用实例存在，且不是卸载、断线状态，执行断开应用 `app.hiddenKeepAliveApp`
+
+#### 1.2. 断开应用 - `app.hiddenKeepAliveApp`
+
+目录：`create_app.ts` - `hiddenKeepAliveApp` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L600)]
+
+参数：
+
+- `callback`：和卸载组件用于断开应用后执行回调，通常用于应用重载或修改在线应用属性
+
+流程：
+
+- 通过 `setKeepAliveState` 设置 `keep-alive` 状态为 `KEEP_ALIVE_HIDDEN`
+- 之后 `dispatchCustomEventToMicroApp` 触发一个自定义事件 `appstate-change`，`afterhidden` 事件需要提前发送，原因见源码备注
+- `dispatchLifecyclesEvent` 向父应用派发 `AFTERHIDDEN` 生命周期事件
+- 如果路由是 `search` 模式需要清理下路由的生命周期事件 `this.sandBox?.removeRouteInfoForKeepAliveApp()`
+- 如果应用 `level` 不是 2：解析静态资源成可执行代码，卸载应用 `mount`，详细见：3.4. 挂载应用 [[查案](#34-unmount-挂载应用)]
+- 如果应用 `level` 是 2：创建一个新的 `div`，将容器的 `children` 拷贝放进去
+- 最后执行回调，以便应用重载这样的场景重新挂载
