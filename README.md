@@ -1224,4 +1224,39 @@ public url: string; // 应用 URL
 
 #### 3.4. `unmount` 挂载应用
 
-接 3.2 执行卸载 [[查看](#32-disconnectedcallback-卸载组件)]，流程如下：
+接 3.2 执行卸载 [[查看](#32-disconnectedcallback-卸载组件)]
+
+目录：`create_app.ts` - `unmount` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L451)]
+
+参数：
+
+- `destroy`：彻底清除，删除缓存资源
+- `clearData`：清空数据，参考官方官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/data?id=%e4%ba%94%e3%80%81%e6%b8%85%e7%a9%ba%e6%95%b0%e6%8d%ae)]
+- `keepRouteState`：保持路由状态，默认是 `false`
+- `unmountcb`：卸载之后的回调
+
+先看执行场景有 2 个：
+
+- 组件卸载 `unmount`，见组件卸载场景 [[查看](#32-disconnectedcallback-卸载组件)]
+- 手动卸载 `unmountApp`，使用方式见官方文档 [[查看](https://micro-zoe.github.io/micro-app/docs.html#/zh-cn/api?id=unmountapp)]
+
+手动卸载时参数由传入的 `options` 来决定，主要看组件卸载这部分：
+
+- `destroy` 优先匹配 `handleDisconnected` 传入的参数，只在 `reload` 命令行重载时才强制清除，其他情况由组件属性 `destroy` 或 `destory` 决定
+- `clearData` 由组件属性 `clear-data` 决定
+- `keepRouteState` 由组件属性 `keep-router-state` 决定
+- `unmountcb` 仅在组件重载和修改挂载组件属性的时候会用到 `callback` 来挂载或重新创建应用
+
+现在来解读卸载普通的子应用：
+
+```
+const App: FC  = () => <micro-app name="sub-project" url="//localhost:8080" />
+```
+
+过程如下：
+
+- `react` 销毁组件
+- 销毁组件 `disconnectedCallback`，不提供任何参数
+- 处理 `handleDisconnected`：`destroy` 为 `false`，没有 `callback`
+- 执行 `unmount`：`destroy`、`clearData`、`keepRouteState` 全部为 `false`，没有 `callback`
+- 卸载应用 `app.unmount`
