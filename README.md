@@ -425,7 +425,7 @@
 
 接 2.2 卸载组件 [[查看](#22-disconnectedcallback-卸载组件)]：
 
-- `appInstanceMap` 先拿到应用信息，确保应用存在、没有被卸载、不是隐藏
+- `appInstanceMap` 先拿到应用实例，确保应用存在、没有被卸载、不是隐藏
 - 如果是 `keep-alive` 模式仅断开应用：`app.hiddenKeepAliveApp`
 - 否则卸载应用 `this.unmount(destroy, callback)`
 
