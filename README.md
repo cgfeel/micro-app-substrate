@@ -1224,7 +1224,7 @@ public url: string; // 应用 URL
 
 #### 3.4. `unmount` 挂载应用
 
-接 3.2 执行卸载 [[查看](##32-handledisconnected-执行卸载)]
+接 3.2 执行卸载 [[查看](#32-handledisconnected-执行卸载)]
 
 目录：`create_app.ts` - `unmount` [[查看](https://github.com/micro-zoe/micro-app/blob/c177d77ea7f8986719854bfc9445353d91473f0d/src/create_app.ts#L451)]
 
