@@ -429,6 +429,11 @@
 - 如果是 `keep-alive` 模式仅断开应用：`app.hiddenKeepAliveApp`
 - 否则卸载应用 `this.unmount(destroy, callback)`
 
+**`unmount` 卸载应用**
+
+- 获取应用实例 `appInstanceMap`，判断应用没有卸载 `!app.isUnmounted()`
+- 执行卸载 `app.unmount`
+
 至此整个 `MicroAppElement` 基本说完，大致分了 3 个步骤：
 
 1. 监听属性变化：`attributeChangedCallback`
@@ -1191,3 +1196,7 @@ public url: string; // 应用 URL
 - `dispatchCustomEventToMicroApp` 向微应用派发 `mounted` 事件，通知其已经挂载。
 - `dispatchLifecyclesEvent` 向父应用派发 `MOUNTED` 生命周期事件。
 - 如果应用是隐藏的（`Keep-alive` 模式），则记录并释放所有全局事件 `recordAndReleaseEffect`，确保其后台运行的特性。
+
+#### 3.4. `unmount` 挂载应用
+
+接
